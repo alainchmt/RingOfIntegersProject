@@ -180,6 +180,8 @@ lemma resultant_prod_X_sub_C {ι : Type*} [DecidableEq ι] (f : K[X]) (s : Finse
 
 /--
 The discriminant of a polynomial `f` is defined as the resultant of `f` and its derivative `f'`.
+Note that this differs from the "usual" definition by a multiplicative factor of (-1) ^ (n * (n - 1) / 2) * a
+where n is the degree of `f` and a its leading coefficient.
 -/
 noncomputable def discriminant (f : R[X]) : R :=
   resultant f (derivative f)
