@@ -15,8 +15,8 @@ To accomplish this, we wrote SageMath code that computes the corresponding certi
 
 ## Examples in Lean
 - `DedekindProject4/ExamplesIrreducible`: Examples of irreducibility proofs for polynomials over the integers. 
-- `DedekindProject4/Degree3Examples`: Verification of an integral basis for the ring of integers and discriminant of the non-monogenic degree 3 number fields in the LMFDB, unramified outside the primes 2,3 and 5.
-- `DedekindProject4/Degree5Examples`: Verification of an integral basis for the ring of integers of the non-monogenic degree 5 number fields in the LMFDB, unramified outside the primes 2,3 and 5.
+- `DedekindProject4/Degree3Examples`: Verification of an integral basis for the ring of integers and the discriminant of the 7 non-monogenic degree 3 number fields in the LMFDB, unramified outside the primes 2,3 and 5.
+- `DedekindProject4/Degree5Examples`: Verification of an integral basis for the ring of integers of the 142 non-monogenic degree 5 number fields in the LMFDB, unramified outside the primes 2,3 and 5.
 - `DedekindProject4/Degree6Examples`: Verification of an integral basis for the ring of integers of a degree 6 number field.  
 - `DedekindProject4/Degree8Example`: Verification of an integral basis for the ring of integers of a degree 8 number field.
 
