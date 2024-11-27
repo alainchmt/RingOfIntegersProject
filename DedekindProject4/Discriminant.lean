@@ -233,7 +233,7 @@ lemma updateRow_smul_modifiedSylvesterMatrix [NoZeroSMulDivisors ℕ R] (f : R[X
 The discriminant of a polynomial `f` is defined as the resultant of `f` and its derivative `f'` up to a scaling factor.
 -/
 noncomputable def discriminant (f : R[X]) : R :=
-  Matrix.det (modifiedSylvesterMatrix f)
+  (-1) ^ (f.natDegree * (f.natDegree - 1) / 2) * Matrix.det (modifiedSylvesterMatrix f)
 
 @[simp] lemma discriminant_C (x : R) : discriminant (C x) = 1 := by
   rw [discriminant, modifiedSylvesterMatrix, dif_neg]
@@ -243,7 +243,8 @@ noncomputable def discriminant (f : R[X]) : R :=
 @[simp] lemma discriminant_one : discriminant (1 : R[X]) = 1 := by
   rw [← map_one C, discriminant_C]
 
-@[simp] lemma discriminant_zero : discriminant (0 : R[X]) = 1 := zero_resultant_zero
+@[simp] lemma discriminant_zero : discriminant (0 : R[X]) = 1 := by
+  rw [← map_zero C, discriminant_C]
 
 @[simp] lemma discriminant_of_natDegree_eq_zero (f : R[X]) (hf0 : natDegree f = 0) :
     discriminant f = 1 := by
@@ -253,19 +254,23 @@ noncomputable def discriminant (f : R[X]) : R :=
 variable [NoZeroSMulDivisors ℕ R]
 
 lemma discriminant_def (f : R[X]) (hf : natDegree f ≠ 0) :
-    f.leadingCoeff * discriminant f = resultant f (derivative f) := by
+    f.leadingCoeff * discriminant f = (-1) ^ (f.natDegree * (f.natDegree - 1) / 2) * resultant f (derivative f) := by
   have hf : 0 < natDegree f := Nat.pos_of_ne_zero hf
   have : NeZero (f.natDegree + (derivative f).natDegree) := NeZero.of_pos (by simp [hf])
   rw [resultant, ← updateRow_smul_modifiedSylvesterMatrix, Matrix.det_updateRow_smul,
-      Matrix.updateRow_eq_self, discriminant]
+      Matrix.updateRow_eq_self, discriminant, mul_left_comm]
+
+lemma resultant_derivative_self (f : R[X]) (hf : natDegree f ≠ 0) :
+    resultant f (derivative f) = (-1) ^ (f.natDegree * (f.natDegree - 1) / 2) * f.leadingCoeff * discriminant f := by
+  rw [mul_assoc, discriminant_def _ hf, ← mul_assoc, ← pow_add, ← two_mul, pow_mul, neg_one_pow_two, one_pow, one_mul]
 
 lemma Monic.discriminant_def (f : R[X]) (hf : Monic f) :
-    discriminant f = resultant f (derivative f) := by
+    discriminant f = (-1) ^ (f.natDegree * (f.natDegree - 1) / 2) * resultant f (derivative f) := by
   by_cases hf0 : natDegree f = 0
   · simp [hf.natDegree_eq_zero_iff_eq_one.mp hf0]
-  · rw [← one_mul f.discriminant, ← hf.leadingCoeff, Polynomial.discriminant_def _ hf0]
+  · conv_lhs => rw [← one_mul f.discriminant, ← hf.leadingCoeff, Polynomial.discriminant_def _ hf0]
 
-@[simp] lemma discriminant_X_add_C (b : R) : discriminant (X + C b) = 1 := by
+@[simp] lemma discriminant_X_add_C [Nontrivial R] (b : R) : discriminant (X + C b) = 1 := by
   simp [(monic_X_add_C _).discriminant_def]
 
 @[simp] lemma Fin.val_unique {n : ℕ} [Unique (Fin n)] (i : Fin n) : (i : ℕ) = 0 := by
@@ -299,10 +304,11 @@ theorem natDegree_derivative_eq {R : Type*} [Semiring R] [NoZeroSMulDivisors ℕ
   have : (p.natDegree + (p.natDegree - 1)) = 1 + 2 * (p.natDegree - 1) := by omega
   apply mul_left_cancel₀ ((leadingCoeff_ne_zero.mpr hcp0))
   rw [discriminant_def, derivative_mul, derivative_C, zero_mul, zero_add, C_mul_resultant,
-      resultant_C_mul, ← discriminant_def, ← mul_assoc, ← pow_add, natDegree_C_mul hx0,
+      resultant_C_mul _ _ _ hp0, resultant_derivative_self, ← mul_assoc (x ^ _), ← pow_add,
+      mul_left_comm (x ^ _), ← mul_assoc, ← mul_assoc, ← mul_assoc, ← pow_add, natDegree_C_mul hx0,
+      ← two_mul, pow_mul, neg_one_pow_two, one_pow, one_mul, natDegree_C_mul hx0,
       natDegree_derivative_eq, add_comm, leadingCoeff_mul, leadingCoeff_C, this, pow_add, pow_one,
-      mul_assoc, mul_left_comm _ p.leadingCoeff, ← mul_assoc]
-  · assumption
+      mul_assoc, mul_assoc, mul_assoc, mul_left_comm _ p.leadingCoeff, ← mul_assoc]
   · assumption
   · rw [natDegree_C_mul hx0, natDegree_derivative_eq, ne_eq, Nat.sub_eq_zero_iff_le, not_le]
     exact lt_of_le_of_ne (Nat.pos_of_ne_zero hp0) (Ne.symm hp1)
@@ -370,8 +376,9 @@ lemma natDegree_sum_eq {ι : Type*} [DecidableEq ι] {s : Finset ι} {p : ι →
       rwa [Finset.sum_congr rfl (fun i hi => by rw [hdegs _ hi])] at hcoeff
 
 lemma discriminant_prod_X_sub_C [CharZero K] {ι : Type*} [DecidableEq ι] (s : Finset ι) (t : ι → K) :
-    discriminant (∏ i in s, (X - C (t i))) = ∏ i in s, ∏ j in s.erase i, (t i - t j) := by
-  rw [Monic.discriminant_def, derivative_prod_X_sub_C, prod_X_sub_C_resultant]
+    discriminant (∏ i in s, (X - C (t i))) = (-1) ^ (s.card * (s.card - 1) / 2) * ∏ i in s, ∏ j in s.erase i, (t i - t j) := by
+  rw [Monic.discriminant_def, natDegree_prod_X_sub_C, derivative_prod_X_sub_C, prod_X_sub_C_resultant]
+  congr 1
   refine Finset.prod_congr rfl (fun i hi => ?_)
   simp [eval_finset_sum, eval_prod]
   refine Finset.sum_eq_single _
@@ -380,13 +387,28 @@ lemma discriminant_prod_X_sub_C [CharZero K] {ι : Type*} [DecidableEq ι] (s : 
   · exact monic_prod_of_monic _ _ (fun _ _ => monic_X_sub_C _)
 
 @[simp]
+theorem discriminant_map' [CharZero R]  {S : Type*} [CommRing S] [IsDomain S] [CharZero S] (φ : R →+* S)
+    (hφ : Function.Injective φ) (f : R[X]) :
+    discriminant (f.map φ) = φ (discriminant f) := by
+  by_cases hf0 : f.natDegree = 0
+  · simp [hf0, natDegree_map_eq_of_injective hφ]
+  have hf0' : f ≠ 0 := by contrapose! hf0; simp [hf0]
+  apply mul_left_cancel₀ ((leadingCoeff_ne_zero.mpr ((Polynomial.map_ne_zero_iff hφ).mpr hf0')))
+  rw [discriminant_def, derivative_map, resultant_map, leadingCoeff_map' hφ, ← map_mul,
+      discriminant_def, natDegree_map_eq_of_injective hφ, map_mul, map_pow, map_neg, map_one]
+  · assumption
+  · assumption
+  · rwa [natDegree_map_eq_of_injective hφ]
+
+@[simp]
 theorem discriminant_map [CharZero K] {L : Type*} [Field L] [CharZero L] (φ : K →+* L) (f : K[X]) :
     discriminant (f.map φ) = φ (discriminant f) := by
   by_cases hf0 : f.natDegree = 0
   · simp [hf0]
   have hf0' : f ≠ 0 := by contrapose! hf0; simp [hf0]
   apply mul_left_cancel₀ ((leadingCoeff_ne_zero.mpr (map_ne_zero hf0')))
-  rw [discriminant_def, derivative_map, resultant_map, leadingCoeff_map, ← map_mul, discriminant_def]
+  rw [discriminant_def, derivative_map, resultant_map, leadingCoeff_map, ← map_mul, discriminant_def,
+      natDegree_map, map_mul, map_pow, map_neg, map_one]
   · assumption
   · apply RingHom.injective
   · rwa [natDegree_map]
@@ -482,20 +504,21 @@ lemma Fin.sum_card_sub_one_sub_self {n : ℕ} :
 
 theorem Algebra.discr_of_isAdjoinRootMonic {K : Type*} [Field K] [Algebra ℚ K] {T : ℚ[X]}
     (f : IsAdjoinRootMonic K T) (hT : Irreducible T) :
-    Algebra.discr ℚ (f.powerBasis).basis = (-1) ^ (T.natDegree * (T.natDegree - 1) / 2) * Polynomial.discriminant T := by
+    Algebra.discr ℚ (f.powerBasis).basis = Polynomial.discriminant T := by
   classical
   have hT0 : T ≠ 0 := f.Monic.ne_zero
   have : FiniteDimensional ℚ K := Module.Finite.of_basis f.powerBasis.basis
   apply RingHom.injective (algebraMap ℚ (AlgebraicClosure ℚ))
-  rw [map_mul]
   let _ : Fintype (K →ₐ[ℚ] AlgebraicClosure ℚ) := PowerBasis.AlgHom.fintype f.powerBasis
   have nd_aroots' : (aroots (minpoly ℚ f.root) (AlgebraicClosure ℚ)).Nodup :=
     (nodup_aroots_iff_of_splits (minpoly.ne_zero f.isIntegral_root)
       (IsAlgClosed.splits_codomain (k := AlgebraicClosure ℚ) _)).mpr
     (minpoly.irreducible f.isIntegral_root).separable
-  have card_aroots : Multiset.card (aroots T (AlgebraicClosure ℚ)) = natDegree T := by
-    rw [aroots, ← natDegree_eq_of_degree_eq_some (degree_eq_card_roots hT0 _)]
+  have card_roots : Multiset.card (map (algebraMap ℚ (AlgebraicClosure ℚ)) T).roots = T.natDegree := by
+    rw [← natDegree_eq_of_degree_eq_some (degree_eq_card_roots hT0 _)]
     · apply IsAlgClosed.splits_codomain
+  have card_aroots : Multiset.card (aroots T (AlgebraicClosure ℚ)) = natDegree T := by
+    rw [aroots, card_roots]
   let e : Fin f.powerBasis.dim ≃ (K →ₐ[ℚ] AlgebraicClosure ℚ) := by
     refine (finCongr ?_).trans ((Multiset.equivFin nd_aroots').symm.trans (PowerBasis.liftEquiv' f.powerBasis).symm)
     rw [f.minpoly_eq hT, card_aroots, f.powerBasis_dim]
@@ -531,5 +554,6 @@ theorem Algebra.discr_of_isAdjoinRootMonic {K : Type*} [Field K] [Algebra ℚ K]
       erw [e_apply, e_apply]
     · refine Eq.trans (Fintype.prod_congr _ _ (fun i => Finset.prod_congr rfl (fun j _ => by
         erw [e_apply, e_apply, ← neg_sub, ← neg_one_mul]))) ?_
-      simp only [Finset.prod_mul_distrib, Finset.prod_const, Fin.card_Ioi, Finset.prod_pow_eq_pow_sum, Fin.sum_card_sub_one_sub_self,
-        map_pow, map_neg, map_one]
+      simp only [Finset.prod_mul_distrib, Finset.prod_const, Fin.card_Ioi,
+        Finset.prod_pow_eq_pow_sum, Fin.sum_card_sub_one_sub_self, map_pow, map_neg, map_one,
+        Finset.card_univ, Fintype.card_fin, card_roots]
