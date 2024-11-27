@@ -6,7 +6,6 @@ import DedekindProject4.MaximalAPI
 import Mathlib.NumberTheory.NumberField.Basic
 import DedekindProject4.Degree3Examples.Irreducible6
 import DedekindProject4.DiscriminantSubalgebraBuilder
-import Mathlib.NumberTheory.NumberField.Discriminant
 
 -- Number field with label 3.1.16200.2 in the LMFDB
 
@@ -40,12 +39,12 @@ noncomputable def BQ : SubalgebraBuilderLists 3 ℤ  ℚ K T l where
 ![![0, 0, 1],![40, 15, 0],![0, 20, 15]]]
  s := ![![[], [], []],![[], [], [-2]],![[], [-2], [0, -1]]]
  h := Adj
- honed := rfl
+ honed := by decide!
  hd := by norm_num
  hcc := by decide
  hin := by decide
  hsymma := by decide
- hc_le := by decide
+ hc_le := by decide!
 
 lemma T_degree : T.natDegree = 3 := (SubalgebraBuilderOfList T l BQ).hdeg
 
@@ -76,10 +75,10 @@ def Table : Fin 3 → Fin 3 → List ℤ :=
  ![[0, 1, 0], [0, 0, 2], [40, 15, 0]],
  ![[0, 0, 1], [40, 15, 0], [0, 20, 15]]]
 
-lemma timesTableT_eq_Table :  ∀ i j , Table i j = List.ofFn (timesTableO.table i j) := by decide
+lemma timesTableT_eq_Table :  ∀ i j , Table i j = List.ofFn (timesTableO.table i j) := by decide!
 
 lemma hroot_mem : θ ∈ O := by
-  refine root_in_subalgebra_lists T l BQ ![0, 1, 0] [] rfl
+  refine root_in_subalgebra_lists T l BQ ![0, 1, 0] [] (by decide!)
 
 instance hp2: Fact $ Nat.Prime 2 := fact_iff.2 (by norm_num)
 instance hp3: Fact $ Nat.Prime 3 := fact_iff.2 (by norm_num)
@@ -122,7 +121,7 @@ noncomputable def D : CertificateDedekindAlmostAllLists T l [2] where
  p := ![2, 3, 5]
  exp := ![5, 4, 2]
  pdgood := [3, 5]
- hsub := by decide
+ hsub := by decide!
  hp := by
   intro i ; fin_cases i
   exact hp2.out
@@ -162,8 +161,8 @@ noncomputable def M2 : MaximalOrderCertificateLists 2 O Om hm where
  hmod2 := by decide
  hindv := by decide
  hindw := by decide
- hvFrobKer := by intro i ; fin_cases i <;> rfl
- hwFrobComp := by intro i ; fin_cases i <;> rfl
+ hvFrobKer := by intro i ; fin_cases i ; decide!
+ hwFrobComp := by intro i ; fin_cases i <;> decide!
  g := ![![0, 0, 1],![1, 0, 1],![0, 1, 0]]
  a := ![![![15]],![![16]],![![0]]]
  c := ![![![20, 0]],![![20, 0]],![![0, 1]]]
@@ -171,8 +170,8 @@ noncomputable def M2 : MaximalOrderCertificateLists 2 O Om hm where
  e := ![![![0, 1],![0, 15]],![![1, 1],![0, 16]],![![0, 0],![40, 0]]]
  ab_ind := ![(Sum.inl 0, Sum.inl 0),(Sum.inr 0, Sum.inr 0),(Sum.inl 0, Sum.inr 1)]
  hindab := by decide
- hmul1 := by decide
- hmul2 := by decide
+ hmul1 := by decide!
+ hmul2 := by decide!
 
 
  instance : Fact $ (Irreducible (map (algebraMap ℤ ℚ) T)) where
@@ -191,15 +190,16 @@ theorem O_ringOfIntegers : O = integralClosure ℤ K := by
 
 theorem  O_ringOfIntegers' : O = NumberField.RingOfIntegers K := by rw [O_ringOfIntegers] ; rfl
 
-lemma T_discr : T.discriminant = 64800 :=  by
-  rw [← T_ofList]
-  unfold Polynomial.discriminant
+set_option maxRecDepth 2000 in
+lemma T_discr : T.discriminant = -64800 :=  by
+  rw [T_monic.discriminant_def, T_degree, ← T_ofList]
   have : [-80, -30, 0, 1].derivative = [-30, 0, 3, 0] := rfl
   rw [← ofList_derivative_eq_derivative , this]
   rfl
 
+set_option maxRecDepth 2000 in
 theorem K_discr : NumberField.discr K = -16200 := by
   rw [discr_numberField_eq_discrSubalgebraBuilder
   T_irreducible BQ O_ringOfIntegers]
-  rw [T_degree, T_discr ]
+  rw [T_discr]
   rfl
