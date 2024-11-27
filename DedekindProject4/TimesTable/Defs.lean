@@ -9,7 +9,7 @@ structure TimesTable (ι : Type _) (R : Type _) (S : Type _) [Semiring R] [AddCo
 
 section add_monoid
 
-variable {ι R S : Type _} [Fintype ι] [Semiring R] [AddCommMonoid S] [Module R S] [Mul S]
+variable {ι R S : Type _} [Semiring R] [AddCommMonoid S] [Module R S] [Mul S]
 
 noncomputable def TimesTable.coord (t : TimesTable ι R S) (x : S) (i : ι) : R :=
 t.basis.repr x i
@@ -68,7 +68,7 @@ namespace TimesTable
 
 section AddCommMonoid
 
-variable {R S ι : Type _} [Fintype ι] [CommSemiring R] [AddCommMonoid S] [Module R S]
+variable {R S ι : Type _} [CommSemiring R] [AddCommMonoid S] [Module R S]
 variable [Mul S]
 
 protected lemma coord_zero (t : TimesTable ι R S) (k : ι) :
@@ -114,7 +114,7 @@ end NonUnitalNonAssocSemiring
 
 section Semiring
 
-variable {ι R S : Type _} [Fintype ι] [CommSemiring R] [Semiring S] [Module R S] [IsScalarTower R S S] [SMulCommClass R S S]
+variable {ι R S : Type _} [CommSemiring R] [Semiring S] [Module R S]
 
 protected lemma eval_pow_zero (t : TimesTable ι R S) (k : ι) (e₁ : S) {e' : R}
   (e_eq : t.coord 1 k = e') :
@@ -142,7 +142,7 @@ end Semiring
 
 section AddCommGroup
 
-variable {R S ι : Type _} [Fintype ι] [CommRing R] [AddCommGroup S] [Mul S] [Module R S]
+variable {R S ι : Type _} [CommRing R] [AddCommGroup S] [Mul S] [Module R S]
 
 protected lemma coord_sub (t : TimesTable ι R S) (k : ι) (e₁ e₂ : S) :
   t.coord (e₁ - e₂) k =  t.coord e₁ k - t.coord e₂ k :=

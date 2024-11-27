@@ -1,6 +1,6 @@
 import DedekindProject4.Tactic.NormAttr
 import DedekindProject4.Tactic.NormNumBigop
-import Mathlib.LinearAlgebra.Matrix.Determinant
+import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
 import Mathlib.Util.Qq
 
 open Lean Mathlib Meta Qq
@@ -111,7 +111,7 @@ def Nat.proveEvenOrOdd (n : Q(ℕ)) : MetaM (Nat.ProveEvenOrOddResult n) := do
     pure (.even q(Nat.even_iff.mpr $pf))
   else do
     have pf : Q($n % 2 ≠ 0) := pf
-    pure (.odd q(odd_iff_not_even.mpr (mt Nat.even_iff.mp $pf)))
+    pure (.odd q(not_even_iff_odd.mp (mt Nat.even_iff.mp $pf)))
 
 variable [Monad m] [MonadLiftT MetaM m] [MResultClass m r]
 
@@ -184,6 +184,7 @@ def evalMatrixDetFinApply {n' : Q(ℕ)} {R : Q(Type u)}
   match ← Nat.unifyZeroOrSucc n' with
   | .zero _pf => MResultClass.eqTransM q(Matrix.det_fin_zero) crr.mkOne
   | .succ n _pf => do
+    trace[norm.Matrix.Det] "evalMatrixDetFinApply: {M}"
     let M' : Q(Fin ($n).succ → Matrix (Fin $n) (Fin $n) $R) :=
       q(fun j => Matrix.submatrix $M Fin.succ (Fin.succAbove j))
     let f : Q(Fin ($n).succ → $R) :=
@@ -387,8 +388,10 @@ def _root_.Lean.Meta.Simp.Result.toMResult {α : Q(Type u)} {e : Q($α)} (res : 
 partial def simpMatrix {R : Q(Type u)} {ι κ : Q(Type v)} (M : Q(Matrix $ι $κ $R))
     (i : Q($ι)) (j : Q($κ)) :
     m (r (α := R) q($M $i $j)) := do
-  trace[norm.Matrix.Det] "simpMatrix: simplifying {q($M $i $j)}"
-  let r ← liftM (m := SimpM) (Simp.simpImpl q($M $i $j))
+  let expr := q($M $i $j)
+  trace[norm.Matrix.Det] "simpMatrix: simplifying {expr}"
+  let r ← liftM (m := SimpM) (Simp.simpImpl expr <|> pure { expr := expr, proof? := none })
+  trace[norm.Matrix.Det] "simpMatrix: simplified to {r.expr}"
   r.toMResult
 
 /-- Evaluate the determinant of a matrix in an arbitrary commutative ring.
@@ -437,7 +440,7 @@ partial def derive (f : {u : Level} → {α : Q(Type u)} → (e : Q($α)) → Me
   let pre e := do
     (Simp.andThen (Simp.preDefault #[simprocs]) <| fun e _ => do
       let ⟨u', α, e⟩ ← inferTypeQ e
-      let u ← u'.dec -- `α : Sort u'`, turn this into `α : Type u`
+      let u ← (u'.dec).getM -- `α : Sort u'`, turn this into `α : Type u`
       have α : Q(Type u) := α
       try
         let r ← f (u := ← instantiateLevelMVars u) (α := ← instantiateMVars α) (← instantiateMVars e)
@@ -473,7 +476,7 @@ partial def simpDerive (f : {u : Level} → {α : Q(Type u)} → (e : Q($α)) �
   let pre e := do
     (Simp.andThen (Simp.preDefault #[simprocs]) <| fun e => do
       let ⟨u', α, e⟩ ← inferTypeQ e
-      let u ← u'.dec -- `α : Sort u'`, turn this into `α : Type u`
+      let u ← (u'.dec).getM -- `α : Sort u'`, turn this into `α : Type u`
       have α : Q(Type u) := α
       try
         let r ← f (u := ← instantiateLevelMVars u) (α := ← instantiateMVars α) (← instantiateMVars e)
@@ -576,12 +579,16 @@ lemma foo₄ [CommRing R] : Matrix.det !![3, 2, 1, 0; 5, 4, 3, 2; 7, 5, 2, 1; 1,
 lemma var_foo₂ [CommRing R] (a b c d : R) : Matrix.det !![a, b; c, d] = a * d - b * c := by conv_test; ring
 lemma var_foo₃ [CommRing R] (a b c d e f g h i : R) : Matrix.det !![a, b, c; d, e, f; g, h, i] = a * e * i - a * f * h + (-(e * g * c) - i * b * d) + f * b * g + h * d * c := by conv_test; ring
 
+/-
 section simp
 
 -- Don't cheat by using existing `simp` lemmas
 attribute [-simp] Matrix.cons_val' Matrix.cons_val_fin_one Matrix.cons_val_zero Matrix.of_apply Fin.succ_zero_eq_one Fin.succ_zero_eq_one'
 
-lemma bar₀ [CommRing R] : Matrix.det (R := R) !![] = (1 : R) := by simp_test -- FIXME! Discharge this
+set_option trace.Meta.Tactic.simp true
+set_option trace.norm.Matrix.Det true
+
+lemma bar₀ [CommRing R] : Matrix.det (R := R) !![] = (1 : R) := by simp_test
 lemma bar₁ [CommRing R] : Matrix.det !![2] = (2 : R) := by simp_test
 lemma bar₂ [CommRing R] : Matrix.det !![3, 2; 5, 4] = (2 : R) := by simp_test; norm_num1
 lemma bar₃ [CommRing R] : Matrix.det !![3, 2, 1; 5, 4, 3; 7, 5, 2] = -(2 : R) := by simp_test; norm_num1
@@ -591,3 +598,4 @@ lemma var_bar₂ [CommRing R] (a b c d : R) : Matrix.det !![a, b; c, d] = a * d 
 lemma var_bar₃ [CommRing R] (a b c d e f g h i : R) : Matrix.det !![a, b, c; d, e, f; g, h, i] = a * e * i - a * f * h + (-(e * g * c) - i * b * d) + f * b * g + h * d * c := by simp_test; ring
 
 end simp
+-/

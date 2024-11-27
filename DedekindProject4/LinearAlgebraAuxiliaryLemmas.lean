@@ -1,4 +1,6 @@
+import Mathlib.Algebra.Module.Equiv.Basic
 import Mathlib.FieldTheory.Finite.Basic
+import Mathlib.LinearAlgebra.Dimension.Free
 import Mathlib.RingTheory.Localization.Module
 
 /-!  # Linear Algebra auxiliary lemmas   -/

@@ -1,5 +1,5 @@
-import Mathlib.Data.ZMod.Quotient
 import Mathlib.Algebra.Polynomial.FieldDivision
+import Mathlib.Data.ZMod.Quotient
 
 /-! # Polynomials lifts
 

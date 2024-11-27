@@ -1,9 +1,9 @@
-import Mathlib.RingTheory.IsAdjoinRoot
-import Mathlib.RingTheory.Discriminant
 import DedekindProject4.AlgebraAuxiliaryLemmas
-import DedekindProject4.TimesTable.Defs
-import DedekindProject4.PolynomialsAsLists
 import DedekindProject4.LinearAlgebraAuxiliaryLemmas
+import DedekindProject4.PolynomialsAsLists
+import DedekindProject4.TimesTable.Defs
+import Mathlib.RingTheory.Discriminant
+import Mathlib.RingTheory.IsAdjoinRoot
 
 /-!
 # Subalgebra Builder for Adjoin Root
@@ -36,7 +36,7 @@ lemma TimesTable.coord_basis_of_equivFun {R M : Type*} {n : ℕ}
     T.coord ((Ba.equivFun.symm).toFun f) = f := by
   unfold TimesTable.coord
   erw [h, LinearEquiv.toFun_eq_coe, Basis.equivFun_symm_eq_repr_symm']
-  simp only [Basis.repr_symm_apply, Basis.repr_total, Finsupp.equivFunOnFinite_symm_apply_toFun]
+  simp only [Basis.repr_symm_apply, Basis.repr_linearCombination, Finsupp.equivFunOnFinite_symm_apply_toFun]
 
 section PartI
 
@@ -54,6 +54,7 @@ lemma mul_poly_eq_poly_of_poly (p q r s: Q[X])
 variable (b : ι → Q[X]) (s : ι → ι → Q[X]) (a : ι → ι → ι → R)
   (hc : ∀ i j, (b i) * (b j) =  ∑ k, (C (algebraMap R Q (a i j k))) * (b k) - T * (s i j) )
 
+include hc in
 lemma mul_is_closed (i j : ι) :
     h.map (b i) * h.map (b j) ∈ Submodule.span R (Set.range (λ i => h.map (b i))) := by
   specialize hc i j
@@ -128,9 +129,9 @@ variable [IsFractionRing R Q] (hlin : LinearIndependent Q (λ i => h.map (b i)))
 
 local notation "Ba" => basisSubalgebraOfPolys T h b s a hc j hone hlin
 
-lemma basisSubalgebraOfPolysTable [IsFractionRing R Q] (i i' k : ι) :
+lemma basisSubalgebraOfPolysTable (i i' k : ι) :
     Basis.repr Ba (Ba i * Ba i') k = a i i' k := by
-  simp only [basisSubalgebraOfPolys_apply, Submonoid.mk_mul_mk, ← map_mul, hc i i']
+  simp only [basisSubalgebraOfPolys_apply, MulMemClass.mk_mul_mk, ← map_mul, hc i i']
   simp only [map_sub, map_sum, map_mul, IsAdjoinRoot.map_self, zero_mul, sub_zero]
   rw [← congr_fun (Basis.repr_sum_self Ba (a i i')) k]
   refine congr_fun ?_ k
@@ -158,11 +159,15 @@ variable
   (B : ι →  R[X])(d : R)(hd : d ≠ 0)(s : ι → ι → R[X])(a : ι → ι → ι → R)
   (hc : ∀ i j, (B i) * (B j) =  ∑ k, (C (d * (a i j k))) * (B k) - T * (s i j) )
 
+include hd
+
 lemma algebra_map_d_ne_zero [IsFractionRing R Q]: ((algebraMap R Q) d)⁻¹ ≠ 0 :=
   inv_ne_zero ((map_ne_zero_iff (algebraMap R Q) (IsFractionRing.injective R Q)).mpr hd)
 
 local notation "b" => λ i => C (algebraMap R Q d)⁻¹ * map (algebraMap R Q) (B i)
 local notation "s'" => λ i j => (C (algebraMap R Q d)⁻¹) ^ 2 * map (algebraMap R Q) (s i j)
+
+include hc
 
 lemma poly_identities_aux [IsFractionRing R Q] (i j : ι) :
   (b i) * (b j) =
@@ -174,12 +179,12 @@ lemma poly_identities_aux [IsFractionRing R Q] (i j : ι) :
   mul_comm (C (algebraMap R Q d)⁻¹) _, ← mul_assoc, ← Polynomial.map_mul, hc i j]
   simp only [map_mul, Polynomial.map_sub, Polynomial.map_mul, Polynomial.map_sum]
   rw [mul_assoc, sq, sub_mul, mul_comm, mul_assoc, Finset.mul_sum, Finset.mul_sum]
-  refine Mathlib.Tactic.LinearCombination.sub_pf ?_ ?_
-  congr
-  · refine funext ?_
+  congr 1
+  . congr
+    refine funext ?_
     intro l
     rw [Polynomial.map_C, mul_assoc (C ((algebraMap R Q) d)) _ (map (algebraMap R Q) (B l)),
-      ← mul_assoc (C ((algebraMap R Q) d)⁻¹) (C ((algebraMap R Q) d)) _ , ←Polynomial.C_mul, inv_mul_cancel _ ]
+      ← mul_assoc (C ((algebraMap R Q) d)⁻¹) (C ((algebraMap R Q) d)) _ , ←Polynomial.C_mul, inv_mul_cancel₀ _]
     simp only [map_one, map_C, one_mul]
     ring
     exact this
@@ -187,10 +192,13 @@ lemma poly_identities_aux [IsFractionRing R Q] (i j : ι) :
 
 variable (h : IsAdjoinRoot K (map (algebraMap R Q) T)) (j : ι) (honed : B j = C d)
 
+include honed
+
+omit [Fintype ι] hc in
 lemma hone_aux [IsFractionRing R Q] : b j = 1 := by
   have : algebraMap R Q d ≠ 0 := (map_ne_zero_iff (algebraMap R Q) (IsFractionRing.injective R Q)).mpr hd
   simp_rw [honed, Polynomial.map_C, ←Polynomial.C_mul]
-  rw [inv_mul_cancel _, map_one]
+  rw [inv_mul_cancel₀ _, map_one]
   exact this
 
 noncomputable def subalgebraOfPolysInt [IsFractionRing R Q]: Subalgebra R K := by
@@ -264,6 +272,7 @@ variable
 
   (h : IsAdjoinRoot K (map (algebraMap R Q) T))
 
+include hm hdeg hpoly hdet in
 lemma linearIndependentOfUpperTriangular [IsFractionRing R Q] :
   LinearIndependent Q (λ i => h.map (map (algebraMap R Q) (B i))) := by
   have heq : (map (algebraMap R Q) T).natDegree = n := by
@@ -456,7 +465,7 @@ lemma root_in_subalgebra (T : R[X])(A : SubalgebraBuilder n R Q K T)
   apply_fun (fun y => algebraMap Q K (algebraMap R Q A.d)⁻¹ * y) at h
   conv at h =>
     right
-    rw [← mul_assoc, ← map_mul, inv_mul_cancel (((map_ne_zero_iff (algebraMap R Q)
+    rw [← mul_assoc, ← map_mul, inv_mul_cancel₀ (((map_ne_zero_iff (algebraMap R Q)
       (IsFractionRing.injective R Q)).mpr A.hd)),
      map_one, one_mul]
   have : ∀ x,  (algebraMap Q K) ((algebraMap R Q) x) = (algebraMap Q K).comp (algebraMap R Q) x := by
@@ -481,9 +490,9 @@ noncomputable def SubalgebraBuilderOfList [DecidableEq R](T : R[X])(l : List R)
     rw [← Nat.succ_inj, ← Nat.add_one , A.hofL,  natDegree_ofList l ,A.hlen] ; exact List.ne_nil_of_length_eq_add_one A.hlen
     rw [dropTrailingZeros_eq_dropTrailingZeros'] ; exact A.htr,
     hm := by
-      rw [A.hofL, ofList_coeff _ ⟨n, by simp only [A.hlen, lt_add_iff_pos_right, zero_lt_one]⟩]
+      rw [A.hofL, ofList_coeff _ n (by simp only [A.hlen, lt_add_iff_pos_right, zero_lt_one])]
       have aux := A.hm
-      rw [List.getLast_eq_get] at aux
+      rw [List.getLast_eq_getElem] at aux
       convert aux
       rw [A.hlen, add_tsub_cancel_right],
     B := fun i => ofList (List.ofFn (A.B i)),
@@ -558,7 +567,7 @@ lemma root_in_subalgebra_lists [DecidableEq R](T : R[X])(l : List R)
 --------------------------------------------------------------------------------
 -- Results on the discriminant of the subalgebra constructed with `SubalgebraBuilder` -/
 
-variable [NeZero n][DecidableEq R] {T : R[X]} {l : List R}
+variable [DecidableEq R] {T : R[X]} {l : List R}
   [CommRing O] [Algebra R O]
   (A : SubalgebraBuilderLists n R Q K T l)
 
@@ -583,8 +592,8 @@ lemma OfBuilderList_discr_eq_prod_discr' :
   have hdegeq : (map (algebraMap R Q) T).natDegree = T.natDegree := by
     rw [natDegree_map_eq_iff, hMonic]
     simp only [map_one, ne_eq, one_ne_zero, not_false_eq_true, true_or]
-  have hkdim : FiniteDimensional.finrank Q K = n := by
-    rw [← (SubalgebraBuilderOfList T l A).hdeg, FiniteDimensional.finrank_eq_card_basis
+  have hkdim : Module.finrank Q K = n := by
+    rw [← (SubalgebraBuilderOfList T l A).hdeg, Module.finrank_eq_card_basis
     (isAMK A).powerBasis.3, IsAdjoinRootMonic.powerBasis_dim, Fintype.card_fin]
     exact hdegeq
   have pbdim : (isAMK A).powerBasis.dim = n := by
@@ -645,8 +654,7 @@ lemma OfBuilderList_discr_eq_prod_discr (f : IsAdjoinRootMonic O T) :
 
 /-- An expression for the discriminant over `ℤ` of a basis for
   the subalgebra `subalgebraOfBuilderLists` -/
-lemma OfBuilderList_discr_eq_prod_discr_int [NeZero n]
-  [CommRing O] {K : Type*} [CommRing K][ Algebra ℚ K] [IsScalarTower ℤ ℚ K]
+lemma OfBuilderList_discr_eq_prod_discr_int {K : Type*} [CommRing K] [Algebra ℚ K] [IsScalarTower ℤ ℚ K]
   (T : ℤ[X]) (l : List ℤ) (A : SubalgebraBuilderLists n ℤ ℚ K T l)
   (f : IsAdjoinRootMonic O T) :
   Algebra.discr ℤ (basisOfBuilderLists T l A) =
@@ -661,7 +669,7 @@ refine Int.ediv_eq_of_eq_mul_left ?_ ?_
   rw [map_mul, map_mul, OfBuilderList_discr_eq_prod_discr A f, mul_pow]
   cancel_denoms
   ring_nf
-  rw [mul_assoc, inv_pow, mul_inv_cancel, mul_one]
+  rw [mul_assoc, inv_pow, mul_inv_cancel₀, mul_one]
   erw [mul_comm, ← Int.cast_pow, Int.cast_ne_zero]
   exact haux
   exact RingHom.injective_int (algebraMap ℤ ℚ)

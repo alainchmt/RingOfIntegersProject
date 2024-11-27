@@ -124,7 +124,7 @@ noncomputable def Algebra.adjoinRootEquivOfRootMem [CommRing R] [IsDomain R] [Fi
 
 lemma surj_fraction_ring_of_eq_rank [NeZero n][CommRing R] [IsDomain R] [Field Q] [Algebra R Q]
     [IsFractionRing R Q] [CommRing K] [Algebra R K] [Algebra Q K] [IsScalarTower R Q K]
-    [FiniteDimensional Q K] (hd : FiniteDimensional.finrank Q K = n) (O : Subalgebra R K)
+    [FiniteDimensional Q K] (hd : Module.finrank Q K = n) (O : Subalgebra R K)
     (b : Basis (Fin n) R O) (x : K) : ∃ (d : R) (y : O), d • x = y ∧ d ∈ nonZeroDivisors R := by
   have : Submodule.span Q (Set.range (O.val ∘ b)) = ⊤ := by
     refine LinearIndependent.span_eq_top_of_card_eq_finrank ?_ ?_
@@ -139,7 +139,7 @@ lemma surj_fraction_ring_of_eq_rank [NeZero n][CommRing R] [IsDomain R] [Field Q
   have h : x ∈ Submodule.span Q (Set.range (O.val ∘ b)) := by
     rw [this]
     exact Submodule.mem_top
-  refine Submodule.span_induction h ?_ ?_ ?_ ?_
+  refine Submodule.span_induction ?_ ?_ ?_ ?_ h
   · rintro x ⟨i, hi⟩
     use 1 , (b i)
     rw [← hi]
@@ -148,13 +148,13 @@ lemma surj_fraction_ring_of_eq_rank [NeZero n][CommRing R] [IsDomain R] [Field Q
   · use 1 , 0
     simp only [smul_zero, ZeroMemClass.coe_zero, true_and]
     exact Submonoid.one_mem (nonZeroDivisors R)
-  · rintro x y ⟨d1,n1,⟨h1, h1z⟩ ⟩ ⟨d2,n2, ⟨h2, h2z⟩⟩
+  · rintro x y _ _ ⟨d1, n1, ⟨h1, h1z⟩⟩ ⟨d2,n2, ⟨h2, h2z⟩⟩
     use d1 * d2 , d2 • n1 + d1 • n2
     constructor
-    · simp only [smul_add, Subsemiring.coe_add, Subalgebra.coe_toSubsemiring, SetLike.val_smul]
+    · simp only [smul_add, AddMemClass.coe_add, Subalgebra.coe_toSubsemiring, SetLike.val_smul]
       rw [← h1, ← h2, mul_smul, mul_smul, smul_comm]
     · exact Submonoid.mul_mem (nonZeroDivisors R) h1z h2z
-  · intro a x ⟨d1,n1,⟨h1, h1z⟩⟩
+  · intro a x _ ⟨d1, n1, ⟨h1, h1z⟩⟩
     obtain ⟨⟨m1, ⟨m2, hm2⟩ ⟩ , h ⟩  := IsLocalization.surj' (R := R) (M := nonZeroDivisors R) a
     use (m2 * d1) , (m1 • n1)
     constructor
@@ -171,7 +171,7 @@ lemma surj_fraction_ring_of_eq_rank [NeZero n][CommRing R] [IsDomain R] [Field Q
 
 lemma isLocalization_fraction_ring_of_eq_rank [NeZero n][CommRing R] [IsDomain R] [Field Q] [Algebra R Q]
     [IsFractionRing R Q] [CommRing K] [Algebra R K] [Algebra Q K] [IsScalarTower R Q K]
-    [FiniteDimensional Q K] (hd : FiniteDimensional.finrank Q K = n) (O : Subalgebra R K)
+    [FiniteDimensional Q K] (hd : Module.finrank Q K = n) (O : Subalgebra R K)
     (b : Basis (Fin n) R O) : IsLocalization (Algebra.algebraMapSubmonoid O (nonZeroDivisors R)) K := by
   rw [isLocalization_iff]
   constructor
@@ -180,7 +180,7 @@ lemma isLocalization_fraction_ring_of_eq_rank [NeZero n][CommRing R] [IsDomain R
     dsimp
     rw [← hya, ← IsScalarTower.algebraMap_apply (R := R) (A := K) (S := O),
         IsScalarTower.algebraMap_apply (R := R) (A := K) (S := Q), ← map_mul,
-        mul_inv_cancel, map_one]
+        mul_inv_cancel₀, map_one]
     exact IsLocalization.to_map_ne_zero_of_mem_nonZeroDivisors Q (fun x a => a) hyz
   constructor
   · intro x
@@ -200,7 +200,7 @@ lemma isLocalization_fraction_ring_of_eq_rank [NeZero n][CommRing R] [IsDomain R
 
 lemma discr_eq_discr_fraction_field [NeZero n] [CommRing R] [IsDomain R] [Field Q] [Algebra R Q]
     [IsFractionRing R Q] [CommRing K] [Algebra R K] [Algebra Q K] [IsScalarTower R Q K]
-    [FiniteDimensional Q K] (hd : FiniteDimensional.finrank Q K = n) (O : Subalgebra R K)
+    [FiniteDimensional Q K] (hd : Module.finrank Q K = n) (O : Subalgebra R K)
     (b : Basis (Fin n) R O) : algebraMap R Q (Algebra.discr R b ) = Algebra.discr Q (O.val ∘ b) := by
   haveI : IsLocalization (Algebra.algebraMapSubmonoid O (nonZeroDivisors R)) K :=
     isLocalization_fraction_ring_of_eq_rank hd O b
@@ -212,7 +212,7 @@ lemma discr_eq_discr_fraction_field [NeZero n] [CommRing R] [IsDomain R] [Field 
 
 lemma discr_of_matrix_mulVec_fraction_field [NeZero n] [CommRing R] [IsDomain R] [Field Q] [Algebra R Q]
     [IsFractionRing R Q] [CommRing K] [Algebra R K] [Algebra Q K] [IsScalarTower R Q K]
-    [FiniteDimensional Q K] (hd : FiniteDimensional.finrank Q K = n) (O O': Subalgebra R K)
+    [FiniteDimensional Q K] (hd : Module.finrank Q K = n) (O O': Subalgebra R K)
     (b : Basis (Fin n) R O) (b' : Basis (Fin n) R O') (A : Matrix (Fin n) (Fin n) Q)
     (hb : O'.val ∘ b' = (A.map (algebraMap Q K)).mulVec (O.val ∘ b) ) :
   algebraMap R Q (Algebra.discr R b') = A.det ^ 2 * algebraMap R Q (Algebra.discr R b) := by
@@ -228,8 +228,8 @@ lemma discr_eq_discr_fraction_field_powerBasis {n : ℕ} [NeZero n] [CommRing R]
   have hdegeq : (map (algebraMap R Q) T).natDegree = T.natDegree := by
     rw [natDegree_map_eq_iff, f.Monic]
     simp only [map_one, ne_eq, one_ne_zero, not_false_eq_true, true_or]
-  have hkdim : FiniteDimensional.finrank Q K = n:= by
-    rw [← hdeg, FiniteDimensional.finrank_eq_card_basis
+  have hkdim : Module.finrank Q K = n:= by
+    rw [← hdeg, Module.finrank_eq_card_basis
     k.powerBasis.3, IsAdjoinRootMonic.powerBasis_dim, Fintype.card_fin]
     exact hdegeq
   have pbdim : f.powerBasis.dim = n := by
@@ -289,7 +289,7 @@ lemma inv_matrix_eq_integral_fraction_field [NeZero n] [CommRing R] [IsDomain R]
   ext i
   unfold Matrix.mulVec ; unfold Matrix.dotProduct
   simp only [ Matrix.map_apply, LinearMap.toMatrix_transpose_apply]
-  simp only [Subalgebra.coe_val, Function.comp_apply, Basis.map_apply, Submodule.coeSubtype]
+  simp only [Subalgebra.coe_val, Function.comp_apply, Basis.map_apply, Submodule.coe_subtype]
   have : (b i : K) =  algebraMap O' K ((O.linearEquivOfInclusion O' hm) (b i)) := rfl
   rw [this]
   nth_rw 1 [← Basis.sum_repr b' ((O.linearEquivOfInclusion O' hm) (b i))]

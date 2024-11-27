@@ -1,8 +1,7 @@
-import Mathlib.LinearAlgebra.Charpoly.ToMatrix
-import Mathlib.LinearAlgebra.Quotient
-import Mathlib.LinearAlgebra.FiniteDimensional
-import Mathlib.Data.ZMod.Algebra
 import Mathlib.Data.ZMod.Basic
+import Mathlib.LinearAlgebra.Charpoly.ToMatrix
+import Mathlib.LinearAlgebra.FiniteDimensional
+import Mathlib.LinearAlgebra.Quotient.Basic
 /-!
 # Certify kernel
 
@@ -69,13 +68,13 @@ noncomputable def basisKernelOfLinearIndependentKerIm {B: Type*} [DivisionRing R
   set s := λ i => (⟨ (f ∘ v') i , hinr i ⟩ : LinearMap.range f) with hs
   have hlin3 : LinearIndependent R s := by
     have hwd : (LinearMap.range f).subtype ∘ s = f ∘ v' := by
-      rw [Submodule.coeSubtype]
+      rw [Submodule.coe_subtype]
       ext
       simp only [Function.comp_apply, Submodule.coe_mk]
     rwa [ ← hwd, LinearMap.linearIndependent_iff] at hlin2
     refine Submodule.ker_subtype  _
   have hwd : (LinearMap.ker f).subtype ∘ w = v := by
-    rw [Submodule.coeSubtype]
+    rw [Submodule.coe_subtype]
     ext
     simp only [Function.comp_apply, Submodule.coe_mk]
   refine @Basis.mk _ R _ w _ _ _ ?_ ?_
@@ -85,11 +84,11 @@ noncomputable def basisKernelOfLinearIndependentKerIm {B: Type*} [DivisionRing R
   haveI : FiniteDimensional  R (LinearMap.ker f) := FiniteDimensional.finiteDimensional_submodule _
   haveI : FiniteDimensional  R (Submodule.span R (Set.range v)) := FiniteDimensional.finiteDimensional_submodule _
   have hspan : Submodule.span R (Set.range v) = LinearMap.ker f := by
-    refine FiniteDimensional.eq_of_le_of_finrank_le ?_ ?_
+    refine Submodule.eq_of_le_of_finrank_le ?_ ?_
     rwa [Submodule.span_le, Set.range_subset_iff]
     have hdim := LinearMap.finrank_range_add_finrank_ker f
-    rw [FiniteDimensional.finrank_eq_card_basis b] at hdim
-    have hr1 : Fintype.card τ₂ ≤ FiniteDimensional.finrank R (LinearMap.range f) := by
+    rw [Module.finrank_eq_card_basis b] at hdim
+    have hr1 : Fintype.card τ₂ ≤ Module.finrank R (LinearMap.range f) := by
       exact hlin3.fintype_card_le_finrank
     rw [finrank_span_eq_card hlin1]
     zify at hdim hr1 ⊢
@@ -104,10 +103,9 @@ noncomputable def basisKernelOfLinearIndependentKerIm {B: Type*} [DivisionRing R
   obtain ⟨y , hy⟩ := Submodule.mem_map.1 hxkc
   have hyeq : y = ⟨x, hxk⟩ := by
     apply Submodule.injective_subtype
-    rw [hy.2, Submodule.coeSubtype, Submodule.coe_mk]
+    rw [hy.2, Submodule.coe_subtype, Submodule.coe_mk]
   rw [← hyeq]
   exact hy.1
-
 
 lemma basisKernelOfLinearIndependentKerImEq_apply {B : Type*} [DivisionRing R]
     [Module R A][AddCommGroup B][Module R B] {τ₁ τ₂ τ₃ : Type* } [Fintype τ₁] [Fintype τ₂] [Fintype τ₃]
@@ -133,7 +131,7 @@ lemma kernel_eq_bot_of_linearIndependent_im {B : Type*} [DivisionRing R]
   let v : Fin 0 → A := λ _ => 0
   have hker : ∀ (i : Fin 0), f (v i) = 0 := by simp only [IsEmpty.forall_iff]
   have hba :=  basisKernelOfLinearIndependentKerIm ?_ b f v v' (linearIndependent_empty_type) hlin2 hker
-  · rw [FiniteDimensional.finrank_eq_card_basis hba]
+  . rw [Module.finrank_eq_card_basis hba]
     simp only [Fintype.card_fin]
   simp only [Fintype.card_fin, zero_add]
 
@@ -168,7 +166,7 @@ noncomputable def basisExtensionKernelOfLinearIndependentKerIm
   haveI := Basis.index_nonempty  b
   haveI := Equiv.nonempty (Fintype.equivOfCardEq hcard)
   refine basisOfLinearIndependentOfCardEqFinrank hlin ?_
-  rw [FiniteDimensional.finrank_eq_card_basis b]
+  rw [Module.finrank_eq_card_basis b]
   exact hcard
 
 
@@ -216,7 +214,7 @@ LinearIndependent R v := by
   exact eq_zero_of_ne_zero_of_mul_right_eq_zero hjk1 this
   · intros l _ hlne
     erw [Finsupp.coe_smul, Pi.smul_apply, hjk2 l hlne, smul_zero]
-  · simp only [hins, not_true, Finsupp.coe_smul, IsEmpty.forall_iff]
+  . simp only [hins, not_true, Finsupp.coe_smul, IsEmpty.forall_iff]
 
 
 /-- If `f` is a linear map from `A` to `B →ₗ[R] C `, then its kernel is trivial if there exists

@@ -2,20 +2,20 @@ import DedekindProject4.Discriminant
 import DedekindProject4.CertifyAdjoinRoot
 import DedekindProject4.DedekindCriteria
 import Mathlib.NumberTheory.NumberField.Basic
-import Mathlib.NumberTheory.NumberField.Discriminant
+import Mathlib.NumberTheory.NumberField.Discriminant.Basic
 
 open Polynomial
 
 section Part1
 variable {n : ℕ} [NeZero n] {K : Type*}
 [Field K] [CharZero K] {T : ℤ[X]}
-{l : List ℤ} (hi : Irreducible T)
-(A : SubalgebraBuilderLists n ℤ ℚ K T l)
+{l : List ℤ}
 
 --example : Algebra ℚ K := by apply?
 
 
-lemma algebraBuilder_discr_eq_mul_polynomial_discr :
+lemma algebraBuilder_discr_eq_mul_polynomial_discr (hi : Irreducible T)
+(A : SubalgebraBuilderLists n ℤ ℚ K T l) :
    algebraMap ℤ ℚ ((Algebra.discr ℤ (basisOfBuilderLists T l A) )) =
     ((algebraMap ℤ ℚ (A.d ^ n))⁻¹ * (algebraMap ℤ ℚ (∏ i, (A.B i i)))) ^ 2 *
     ((-1) ^ (T.natDegree * (T.natDegree - 1) / 2) *
@@ -33,7 +33,8 @@ lemma algebraBuilder_discr_eq_mul_polynomial_discr :
   exact OfBuilderList_discr_eq_prod_discr' A
 
 
-lemma algebraBuilder_discr_eq_mul_polynomial_discr' :
+lemma algebraBuilder_discr_eq_mul_polynomial_discr' (hi : Irreducible T)
+(A : SubalgebraBuilderLists n ℤ ℚ K T l) :
     (Algebra.discr ℤ (basisOfBuilderLists T l A) ) =
       ((-1) ^ (T.natDegree * (T.natDegree - 1) / 2) *
       (∏ i, (A.B i i)) ^ 2 * T.discriminant) / A.d ^ (2 * n) := by
@@ -53,14 +54,15 @@ lemma algebraBuilder_discr_eq_mul_polynomial_discr' :
   simp only [← mul_assoc, mul_eq_mul_right_iff, pow_eq_zero_iff',
    neg_eq_zero, one_ne_zero, ne_eq,
     false_and, or_false]
-  rw [mul_assoc, mul_inv_cancel, mul_one]
+  rw [mul_assoc, mul_inv_cancel₀, mul_one]
   · rw [mul_comm]
     exact Rat.num_ne_zero.mp haux
   · exact RingHom.injective_int (algebraMap ℤ ℚ)
 
 variable [NumberField K]
 
-lemma discr_numberField_eq_discrSubalgebraBuilder
+lemma discr_numberField_eq_discrSubalgebraBuilder (hi : Irreducible T)
+(A : SubalgebraBuilderLists n ℤ ℚ K T l)
   (heq : subalgebraOfBuilderLists T l A = integralClosure ℤ K ) :
   NumberField.discr K = ((-1) ^ (T.natDegree * (T.natDegree - 1) / 2) *
       (∏ i, (A.B i i)) ^ 2 * T.discriminant) / A.d ^ (2 * n) := by
@@ -70,8 +72,8 @@ lemma discr_numberField_eq_discrSubalgebraBuilder
   have  f := Subalgebra.equivOfEq _ _ heq
   have icongr: Module.Free.ChooseBasisIndex ℤ (NumberField.RingOfIntegers K) ≃ Fin n := by
     refine Fintype.equivOfCardEq  ?_
-    rw  [← FiniteDimensional.finrank_eq_card_chooseBasisIndex, NumberField.RingOfIntegers.rank, Fintype.card_fin]
-    have :=  (FiniteDimensional.finrank_eq_card_basis (IsAdjoinRootMonic.powerBasis (isAMK A)).basis )
+    rw  [← Module.finrank_eq_card_chooseBasisIndex, NumberField.RingOfIntegers.rank, Fintype.card_fin]
+    have :=  (Module.finrank_eq_card_basis (IsAdjoinRootMonic.powerBasis (isAMK A)).basis )
     rw [IsAdjoinRootMonic.powerBasis_dim, hdeg, (SubalgebraBuilderOfList T l A).hdeg, Fintype.card_fin] at this
     convert this
   let Bi := Basis.map (M' := integralClosure ℤ K) (basisOfBuilderLists T l A) f

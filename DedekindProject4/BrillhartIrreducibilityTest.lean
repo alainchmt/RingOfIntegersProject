@@ -1,6 +1,10 @@
-import Mathlib.Analysis.Complex.Polynomial
-import Mathlib.RingTheory.MvPolynomial.Homogeneous
 import DedekindProject4.IrreduciblePolynomialZModp
+import DedekindProject4.PolynomialsAsLists
+import Mathlib.Analysis.Complex.Polynomial.Basic
+import Mathlib.Data.Complex.Cardinality
+import Mathlib.Data.List.Indexes
+import Mathlib.FieldTheory.Finite.Basic
+import Mathlib.RingTheory.MvPolynomial.Homogeneous
 
 /-!
 
@@ -172,7 +176,7 @@ lemma irreducible_of_eval_mul_prime (m : ℤ) (ρ : ℝ) (d p s : ℕ) (hdn : d 
       simp only [algebraMap_int_eq, eq_intCast]
       linarith
     have hadn : a.natDegree ≠ 0 :=  fun hca => by (rw [hca, Nat.le_zero] at hadeg ; exact hdn hadeg)
-    convert le_trans (pow_le_pow_right ?_ hadeg) (pow_lt_abs_eval m (algebraMap ℤ ℂ)
+    convert le_trans (pow_le_pow_right₀ ?_ hadeg) (pow_lt_abs_eval m (algebraMap ℤ ℂ)
       ρ (a.natDegree) hadn (Complex.abs) a ?_ (Polynomial.natDegree_map_eq_of_injective
     (RingHom.injective_int (algebraMap ℤ ℂ)) _ ) hla ha1 hrhoaux)
     · simp only [Int.cast_abs, algebraMap_int_eq, eq_intCast, abs_intCast]
@@ -279,7 +283,7 @@ lemma polynomial_roots_le_cauchy_bound (P : Polynomial ℂ ) (z : ℂ)
       rw [← geom_sum_mul _ _, mul_assoc]
     unfold cauchyBound
     rw [← sub_le_iff_le_add',
-      le_div_iff (AbsoluteValue.pos Complex.abs (Polynomial.leadingCoeff_ne_zero.2 h)),
+      le_div_iff₀ (AbsoluteValue.pos Complex.abs (Polynomial.leadingCoeff_ne_zero.2 h)),
       ←  mul_le_mul_iff_of_pos_right (a := (Complex.abs z ^ P.natDegree))]
     refine le_trans ?_ (le_trans aux2 (mul_le_mul_of_nonneg_left (le_of_lt (sub_one_lt _))
       (maxCoeffsAux_nonneg P)))
@@ -313,7 +317,7 @@ lemma polynomial_roots_le_cauchy_bound_scale (P : Polynomial ℂ) (z : ℂ)
   refine le_of_mul_le_mul_of_pos_left (a := r⁻¹) ?_ (inv_pos_of_pos hs)
   have : r⁻¹ * Complex.abs z = Complex.abs (r⁻¹ * z) := by
     rw [ofReal_inv, map_mul, map_inv₀, abs_ofReal, abs_of_nonneg (a := r) (le_of_lt hs)]
-  rw [this, cauchyBoundScaled, ← mul_assoc, inv_mul_cancel (Ne.symm (ne_of_lt hs)), one_mul]
+  rw [this, cauchyBoundScaled, ← mul_assoc, inv_mul_cancel₀ (Ne.symm (ne_of_lt hs)), one_mul]
   have hroots : r⁻¹ * z ∈ (P.scaleRoots r⁻¹).roots := by
     simp only [ofReal_inv, mem_roots', ne_eq, IsRoot.def]
     refine ⟨Polynomial.scaleRoots_ne_zero h r⁻¹ , ?_ ⟩
@@ -338,9 +342,9 @@ def maxCoeffsAuxScaleOfList (l : List ℤ) (r : ℚ) :=
   if h : l.length - 1 = 0 then 0 else
   WithBot.unbot (List.maximum ((List.dropLast l).mapIdx
   (fun n c => |(algebraMap ℤ ℚ c)| * (1 / ↑r ^ ((l.length - 1) - n)) )))
-  (List.maximum_ne_bot_of_ne_nil
-  (by rw [ne_eq, List.mapIdx_eq_nil , ← ne_eq,
-  ← List.length_pos , List.length_dropLast];  exact (Nat.pos_of_ne_zero h) ))
+  (List.maximum_ne_bot_of_ne_nil (by
+    rw [ne_eq, List.mapIdx_eq_nil_iff, ← ne_eq, ← List.length_pos , List.length_dropLast]
+    exact (Nat.pos_of_ne_zero h) ))
 
 lemma maxCoeffsAuxScale_ofList (l : List ℤ) (hl : l = l.dropTrailingZeros) (r : ℚ) :
     maxCoeffsAuxScale ((ofList l).map (algebraMap ℤ ℂ)) r = maxCoeffsAuxScaleOfList l r := by
@@ -381,7 +385,7 @@ lemma maxCoeffsAuxScale_ofList (l : List ℤ) (hl : l = l.dropTrailingZeros) (r 
       ← Polynomial.natDegree_map_eq_of_injective (RingHom.injective_int (algebraMap ℤ ℂ)),
          ofList_map _ _ ]
       congr
-      exact (ofList_coeff (R := ℤ) _ _).symm
+      exact (ofList_coeff (R := ℤ) _ _ _).symm
 
 /-- A computable version of the scaled Cauchy bound of a polynomial given by a list. -/
 def cauchyBoundScaledOfList (l : List ℤ) (r : ℚ) : ℚ :=
@@ -432,7 +436,7 @@ and `s < (|M| - ρ) ^ d` then `T` is irreducible.
 
 To get a proof of the irreducibility of `F i j` one can use `CertificateIrreducibleZModOfList'`  -/
 
-structure CertificateIrreducibleIntOfPrimeDegreeAnalysis (f : Polynomial ℤ) (l : List ℤ) :=
+structure CertificateIrreducibleIntOfPrimeDegreeAnalysis (f : Polynomial ℤ) (l : List ℤ) where
   hpol : f = ofList l
   hdeg : 1 < l.length
   hprim : List.foldr gcd 0 l = 1
@@ -457,7 +461,7 @@ structure CertificateIrreducibleIntOfPrimeDegreeAnalysis (f : Polynomial ℤ) (l
   hirr : ∀ i j , Irreducible (ofList (F i j))
   hm : ∀ i j, (F i j).getLast (List.ne_nil_of_length_pos (lt_of_lt_of_eq (Nat.succ_pos (D i j)) (hl i j).symm) ) ≠ 0
   hprod : ∀ i, (List.prod (List.ofFn (fun j => F i j))).dropTrailingZeros' = List.map (algebraMap ℤ (ZMod (p i))) l
-  hinter : ((List.bagInterOfFn (fun i => partialSums (List.ofFn (D i)))).filter (fun a => a ≠ 0)).minimum? = some d
+  hinter : ((List.bagInterOfFn (fun i => partialSums (List.ofFn (D i)))).filter (fun a => a ≠ 0)).min? = some d
   hrhoeq : cauchyBoundScaledOfList l r = ρ
   hrho : ρ + 1 ≤ |M|
   hs : s < (|M| - ρ) ^ d
@@ -506,7 +510,7 @@ lemma irreducible_of_CertificateIrreducibleIntOfPrimeDegrees (f : Polynomial ℤ
  and taking `d = 1` as a known degree bound. This is convenient when knowing a bigger bound doesn't
  result in finding a smaller prime witness, so degree analysis
  doesn't provide an advantage.  -/
-structure CertificateIrreducibleIntOfPrime (f : Polynomial ℤ) (l : List ℤ) :=
+structure CertificateIrreducibleIntOfPrime (f : Polynomial ℤ) (l : List ℤ) where
   hpol : f = ofList l
   hdeg : 1 < l.length
   hprim : List.foldr gcd 0 l = 1

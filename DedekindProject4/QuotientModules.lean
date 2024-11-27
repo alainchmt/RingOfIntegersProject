@@ -1,5 +1,5 @@
 import Mathlib.LinearAlgebra.FreeModule.IdealQuotient
-import Mathlib.RingTheory.Ideal.Norm
+import Mathlib.RingTheory.Ideal.Norm.RelNorm
 
 /- !
 
@@ -80,11 +80,12 @@ lemma Submodule.eq_top_of_index_isUnit  (N : Submodule R M) [Module.Free R M] [M
   intro x
   have aux : (LinearEquiv.ofIsUnitDet hu) ((LinearEquiv.ofIsUnitDet hu).symm x) =
     ((LinearEquiv.ofIsUnitDet hu).symm x).1 := by
-    simp only [LinearEquiv.ofIsUnitDet_symm_apply, LinearEquiv.ofIsUnitDet_apply, coeSubtype]
+    simp only [LinearEquiv.ofIsUnitDet_symm_apply, LinearEquiv.ofIsUnitDet_apply, coe_subtype]
   rw [← LinearEquiv.apply_symm_apply (LinearEquiv.ofIsUnitDet hu) x, aux]
   simp only [LinearEquiv.ofIsUnitDet_symm_apply, SetLike.coe_mem]
 
-lemma LinearMap.toMatrix_eq_of_index_equiv {N : Type*} [AddCommMonoid N]
+lemma LinearMap.toMatrix_eq_of_index_equiv {R : Type*} [CommRing R] [Module R M]
+    {N : Type*} [AddCommMonoid N]
     [Module R N] (B : Basis ι R M) (b : Basis ι R N) (f : N →ₗ[R] M )
     (e : ι ≃ ι') :
     (LinearMap.toMatrix b B f).det = (LinearMap.toMatrix (b.reindex e) (B.reindex e) f).det := by
@@ -148,11 +149,11 @@ lemma Submodule.indexPID_dvd_of_le [Module.Free R M]
        (Fintype.equivFin (Module.Free.ChooseBasisIndex R M))
     haveI aux : Module.Finite R N₁ := Module.Finite.of_basis (Submodule.basisOfPid B N₁).2
     haveI : Module.Finite R N₂ := Module.Finite.of_basis  (Submodule.basisOfPid B N₂).2
-    rw [← finrank_eq_rank, ← finrank_eq_rank] at heq
+    rw [← Module.finrank_eq_rank, ← Module.finrank_eq_rank] at heq
     norm_cast at heq
     have heq2': Module.rank R M = Module.rank R N₂ := by
-      rw [← finrank_eq_rank, ← finrank_eq_rank ,
-      LE.le.antisymm (by rw [heq] ; exact (Submodule.finrank_le_finrank_of_le hle)) (Submodule.finrank_le N₂)]
+      rw [← Module.finrank_eq_rank, ← Module.finrank_eq_rank ,
+      LE.le.antisymm (by rw [heq] ; exact (Submodule.finrank_mono hle)) (Submodule.finrank_le N₂)]
     let f := Submodule.inclusion hle
     let g := (Submodule.subtype N₂)
     let b₁ := Submodule.basisOfPID_of_eq_rank N₁ heqc
@@ -219,7 +220,7 @@ lemma moduleSmithCoeff_ne_unit (N : Submodule R M) (b : Basis ι R M) (b2 : Basi
     set y : N := ∑ i : ι , (((smithBasisModule N b b2).repr x) i) • (c i • (moduleSmithSubmodule N b b2 i)) with hy
     have : y.1 = x := by
       rw [← this, hy]
-      simp only [AddSubmonoid.coe_finset_sum, Submodule.coe_toAddSubmonoid, SetLike.val_smul,
+      simp only [AddSubmonoidClass.coe_finset_sum, Submodule.coe_toAddSubmonoid, SetLike.val_smul,
         smith_coeffs_property]
     rw [← this]
     exact y.2
@@ -233,7 +234,7 @@ lemma prod_moduleSmithCoeffs_associated_index [Module.Free R M]
     (Submodule.subtype N) = Matrix.diagonal (λ i => (moduleSmithCoeffs N B b i)) := by
     ext x y
     rw [LinearMap.toMatrix_apply]
-    simp only [Submodule.coeSubtype, smith_coeffs_property, map_smul, Basis.repr_self,
+    simp only [Submodule.coe_subtype, smith_coeffs_property, map_smul, Basis.repr_self,
       Finsupp.smul_single, smul_eq_mul, mul_one, ne_eq]
     by_cases h : x = y
     case _ =>
@@ -315,17 +316,3 @@ noncomputable def moduleQuotientEquivPiZMod {n : ℕ} (N : Submodule ℤ M) (b :
   let e' : (∀ i : Fin n, ℤ ⧸ Ideal.span ({a i} : Set ℤ)) ≃+ ∀ i : Fin n, ZMod (a i).natAbs :=
     AddEquiv.piCongrRight fun i => ↑(Int.quotientSpanEquivZMod (a i))
   (↑(e : (M ⧸ N) ≃ₗ[ℤ] _) : M ⧸ N ≃+ _).trans e'
-
-/-- If `M` is a free and finite `ℤ`-module and `N` is a submodule of the same rank,
-  then the absolute value of the index of `N` in `M` (as modules over a PID)
-  coincides with the classical notion of index as the cardinality of `M ⧸ N`. -/
-lemma indexPID_eq_index_int {n : ℕ} [Module.Free ℤ M]
-    [Module.Finite ℤ M] (N : Submodule ℤ M) (b : Basis (Fin n) ℤ M)
-    (b2 : Basis (Fin n) ℤ N) : (Submodule.indexPID N).natAbs = Nat.card (M ⧸ N) := by
-  rw [← Int.natAbs_ofNat (Nat.card (M ⧸ N)), Int.natAbs_eq_iff_associated]
-  refine Associated.trans (prod_moduleSmithCoeffs_associated_index N b b2 ) ?_
-  rw [Nat.card_eq_of_bijective (moduleQuotientEquivPiZMod N b b2), Nat.card_pi]
-  simp only [Nat.card_zmod, Nat.cast_prod]
-  rw [← Int.natAbs_eq_iff_associated, ← Int.natCast_inj]
-  simp only [Int.natCast_natAbs, Finset.abs_prod, abs_abs]
-  exact AddEquiv.bijective (moduleQuotientEquivPiZMod N b b2)

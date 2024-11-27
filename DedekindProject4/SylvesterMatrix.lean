@@ -128,7 +128,7 @@ example : sylvesterVec (m := 3) ![1, 2, 3] 2 = ![0, 0, 1, 2, 3] := by decide
 
 end Zero
 
-variable [CommRing R] [Nontrivial R]
+variable [CommRing R] 
 
 @[simp] lemma vecRotate_smul (a : R) (P : Fin n → R) (i) :
     vecRotate (a • P) i = a • vecRotate P i := by

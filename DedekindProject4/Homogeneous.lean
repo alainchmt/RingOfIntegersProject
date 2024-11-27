@@ -1,6 +1,6 @@
 import Mathlib.Algebra.MvPolynomial.Monad
 import Mathlib.RingTheory.MvPolynomial.Homogeneous
-import Mathlib.RingTheory.MvPolynomial.Symmetric
+import Mathlib.RingTheory.MvPolynomial.Symmetric.FundamentalTheorem
 import Mathlib.RingTheory.Polynomial.Basic
 
 variable {σ R : Type*} [CommRing R]
@@ -17,8 +17,7 @@ section Preliminaries
   case insert x s hxs ih =>
     obtain (rfl | hs) := s.eq_empty_or_nonempty
     · simp
-    rw [Finset.sup_insert, ih hs, sup_eq_max, max_add_add_right (f x) (s.sup f) a,
-        Finset.sup_insert, sup_eq_max]
+    rw [Finset.sup_insert, ih hs, max_add_add_right (f x) (s.sup f) a, Finset.sup_insert]
 
 lemma Nat.sub_self_div_two (h : Even n) : n - n / 2 = n / 2 := by
   refine (Nat.div_eq_of_eq_mul_right two_pos ?_).symm
@@ -857,7 +856,7 @@ theorem MvPolynomial.isWeightedHomogeneous_iff_comp_smul_eq_pow_smul' {σ : Type
         obtain (hdl | hdl) := coeff_zero_or_zero_of_disjoint_support d disj_lhs <;>
             obtain (hdr | hdr) := coeff_zero_or_zero_of_disjoint_support d disj_rhs
         · rw [hdl, hdr]
-        · have h := (ext_iff _ _).mp h d
+        · have h := MvPolynomial.ext_iff.mp h d
           rw [coeff_add, hdl, coeff_add, hdr, zero_add, add_zero] at h
           rw [hdl, ← h]
           simp only [coeff_aeval_X_pow_mul', coeff_X_pow_mul', Option.elim_none, zero_add,
@@ -881,7 +880,7 @@ theorem MvPolynomial.isWeightedHomogeneous_iff_comp_smul_eq_pow_smul' {σ : Type
           · rfl
           · rfl
         -- TODO: this next block is almost the same as the previous one.
-        · have h := (ext_iff _ _).mp h d
+        · have h := MvPolynomial.ext_iff.mp h d
           rw [coeff_add, hdl, coeff_add, hdr, zero_add, add_zero] at h
           rw [hdr, h]
           simp only [coeff_aeval_X_pow_mul', coeff_X_pow_mul', Option.elim_none, zero_add,
@@ -904,11 +903,11 @@ theorem MvPolynomial.isWeightedHomogeneous_iff_comp_smul_eq_pow_smul' {σ : Type
           · rw [h]
           · rfl
           · rfl
-        · simpa [hdl, hdr, -aeval_eq_bind₁] using (ext_iff _ _).mp h d
+        · simpa [hdl, hdr, -aeval_eq_bind₁] using MvPolynomial.ext_iff.mp h d
       refine IsWeightedHomogeneous.add
-          (ih_l.mpr ((ext_iff _ _).mpr h_l))
-          (ih_r.mpr ((ext_iff _ _).mpr fun d => ?_))
-      have h := (ext_iff _ _).mp h d
+          (ih_l.mpr (MvPolynomial.ext_iff.mpr h_l))
+          (ih_r.mpr (MvPolynomial.ext_iff.mpr fun d => ?_))
+      have h := MvPolynomial.ext_iff.mp h d
       rw [coeff_add, h_l] at h
       exact add_left_cancel h
   case h_X p i ih =>
@@ -931,7 +930,8 @@ theorem MvPolynomial.isWeightedHomogeneous_iff_comp_smul_eq_pow_smul' {σ : Type
         · simp only [Option.elim_none, zero_add, map_add, Finsupp.weight_mapDomain,
               Option.elim_some, Finsupp.weight_single, one_mul, mul_zero, add_zero, isUnit_one,
               IsUnit.dvd, Nat.div_one, Finsupp.coe_add, Pi.add_apply, Set.mem_range, exists_false,
-              not_false_eq_true, Finsupp.mapDomain_notin_range, Finsupp.single_eq_same, true_and]
+              not_false_eq_true, Finsupp.mapDomain_notin_range, Finsupp.single_eq_same, true_and,
+              reduceCtorEq]
             at hdeg
           exact (le_add_left le_rfl).trans hdeg
         · exact (hd this.symm).elim
@@ -986,7 +986,7 @@ theorem MvPolynomial.isHomogeneous_iff_comp_smul_eq_pow_smul' {σ : Type*} {p : 
         obtain (hdl | hdl) := coeff_zero_or_zero_of_disjoint_support d disj_lhs <;>
             obtain (hdr | hdr) := coeff_zero_or_zero_of_disjoint_support d disj_rhs
         · rw [hdl, hdr]
-        · have h := (ext_iff _ _).mp h d
+        · have h := MvPolynomial.ext_iff.mp h d
           rw [coeff_add, hdl, coeff_add, hdr, zero_add, add_zero] at h
           rw [hdl, ← h]
           simp only [coeff_aeval_X_mul', coeff_X_pow_mul'] at h hdl hdr ⊢
@@ -1009,7 +1009,7 @@ theorem MvPolynomial.isHomogeneous_iff_comp_smul_eq_pow_smul' {σ : Type*} {p : 
           · rfl
           · rfl
         -- TODO: this next block is almost the same as the previous one.
-        · have h := (ext_iff _ _).mp h d
+        · have h := MvPolynomial.ext_iff.mp h d
           rw [coeff_add, hdl, coeff_add, hdr, zero_add, add_zero] at h
           rw [hdr, h]
           simp only [coeff_aeval_X_mul', coeff_X_pow_mul'] at h hdl hdr ⊢
@@ -1031,11 +1031,11 @@ theorem MvPolynomial.isHomogeneous_iff_comp_smul_eq_pow_smul' {σ : Type*} {p : 
           · rw [h]
           · rfl
           · rfl
-        · simpa [hdl, hdr, -aeval_eq_bind₁] using (ext_iff _ _).mp h d
+        · simpa [hdl, hdr, -aeval_eq_bind₁] using MvPolynomial.ext_iff.mp h d
       refine IsHomogeneous.add
-          (ih_l.mpr ((ext_iff _ _).mpr h_l))
-          (ih_r.mpr ((ext_iff _ _).mpr fun d => ?_))
-      have h := (ext_iff _ _).mp h d
+          (ih_l.mpr (MvPolynomial.ext_iff.mpr h_l))
+          (ih_r.mpr (MvPolynomial.ext_iff.mpr fun d => ?_))
+      have h := MvPolynomial.ext_iff.mp h d
       rw [coeff_add, h_l] at h
       exact add_left_cancel h
   case h_X p i ih =>

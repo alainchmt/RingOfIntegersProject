@@ -1,12 +1,12 @@
--- Adapted from `Mathlib.Tactic.NormNum.BigOperators`
+-- FIXME: merge back into mathlib4 branch norm_num-bigop
 /-
 Copyright (c) 2023 Anne Baanen. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Anne Baanen, Floris van Doorn
 -/
-import Mathlib.Tactic.NormNum.Basic
-import Mathlib.Algebra.BigOperators.Basic
+import Mathlib.Algebra.BigOperators.Group.Finset
 import Mathlib.Data.List.FinRange
+import Mathlib.Tactic.NormNum.Basic
 
 import DedekindProject4.Tactic.RingResult
 
@@ -342,7 +342,7 @@ partial def evalFinsetSum : NormNumExt where eval {u β} e := do
 
   evalFinsetBigop q(Finset.sum) f eval_f res_empty (fun {a s' h} res_fa res_sum_s' ↦ do
       let fa : Q($β) := Expr.app f a
-      let res : Result _ ← evalAdd.core q($fa + Finset.sum $s' $f) q((. + .)) _ _ res_fa res_sum_s'
+      let res : Result _ ← (evalAdd.core q($fa + Finset.sum $s' $f) q((. + .)) _ _ res_fa res_sum_s').getM
       let eq : Q(Finset.sum (Finset.cons $a $s' $h) $f = $fa + Finset.sum $s' $f) :=
         q(Finset.sum_cons $h)
       pure <| res.eq_trans eq)

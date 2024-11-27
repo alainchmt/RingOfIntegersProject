@@ -1,20 +1,20 @@
 import Mathlib.Algebra.MvPolynomial.Monad
 import Mathlib.Algebra.MvPolynomial.Polynomial
 import Mathlib.Algebra.Polynomial.Splits
-import Mathlib.Data.Finset.Lattice
+import Mathlib.Data.Finset.Lattice.Fold
 import Mathlib.Data.Finsupp.Notation
 import Mathlib.Data.Matrix.Basic
 import Mathlib.Data.Matrix.Notation
-import Mathlib.LinearAlgebra.Basis
+import Mathlib.LinearAlgebra.Basis.Basic
+import Mathlib.LinearAlgebra.Determinant
 import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
 import Mathlib.LinearAlgebra.Matrix.ToLin
-import Mathlib.LinearAlgebra.Determinant
 import Mathlib.RingTheory.MvPolynomial.Homogeneous
 import Mathlib.RingTheory.Polynomial.Basic
+import Mathlib.RingTheory.Polynomial.UniqueFactorization
 import Mathlib.RingTheory.Polynomial.Vieta
 import Mathlib.Tactic.CC
 import Mathlib.Tactic.Qify
-import Mathlib.Tactic.SlimCheck
 
 import DedekindProject4.DegreeLT
 import DedekindProject4.Homogeneous
@@ -29,7 +29,7 @@ section general
 
 variable {m n : ℕ}
 
-variable [CommRing R] [Nontrivial R]
+variable [CommRing R]
 
 /-- R[X]_n is notation for the submodule of polynomials of degree strictly less than n. -/
 local notation:9000 R "[x]_" n =>  Polynomial.degreeLT R n
@@ -205,6 +205,7 @@ lemma sign_finAddFlip :
 
 section prod_X_sub_C
 
+variable [Nontrivial R]
 @[simp] lemma Polynomial.leadingCoeff_prod_X_sub_C {σ : Type*} (t : σ → R) (s : Finset σ) :
     (∏ i in s, (X - C (t i))).leadingCoeff = 1 :=
   (leadingCoeff_prod' _ _ (by simp)).trans (by simp)
@@ -217,7 +218,7 @@ section prod_X_sub_C
   rw [leadingCoeff_mul', leadingCoeff_prod'] <;>
     simp [hx0]
 
-@[simp] lemma Polynomial.natDegree_prod_X_sub_C [Nontrivial R] {σ : Type*} (t : σ → R) (s : Finset σ) :
+@[simp] lemma Polynomial.natDegree_prod_X_sub_C {σ : Type*} (t : σ → R) (s : Finset σ) :
     (∏ i in s, (X - C (t i))).natDegree = s.card :=
   (natDegree_prod' _ _ (by simp)).trans (by simp)
 
@@ -234,7 +235,7 @@ section prod_X_sub_C
   · simp [hx0]
   · exact (natDegree_C_mul_prod_X_sub_C _ _ hx0).le
 
-@[simp] lemma Polynomial.prod_X_sub_C_ne_zero [Nontrivial R] {σ : Type*} (t : σ → R) (s : Finset σ) :
+@[simp] lemma Polynomial.prod_X_sub_C_ne_zero {σ : Type*} (t : σ → R) (s : Finset σ) :
     (∏ i in s, (X - C (t i))) ≠ 0 :=
   leadingCoeff_ne_zero.mp (by simp)
 
@@ -275,6 +276,7 @@ lemma Polynomial.splits_C_mul_prod_X_sub_C
     (C x * ∏ i in s, (X - C (t i))).roots = s.val.map t := by
   rw [roots_C_mul _ hx0, roots_prod_X_sub_C']
 
+omit [Nontrivial R]
 lemma Polynomial.isRoot_X_sub_C {x y : R} :
     IsRoot (X - C x) y ↔ x = y := by
   simp [sub_eq_zero, eq_comm]
@@ -408,6 +410,7 @@ lemma MvPolynomial.coeff_eq_zero_of_X_dvd {m : σ →₀ ℕ} {p : MvPolynomial 
   · rfl
   · rfl
 
+variable [Nontrivial R]
 lemma MvPolynomial.isUnit_C [NoZeroDivisors R] {x : R} :
     IsUnit (C (σ := σ) x) ↔ IsUnit x := by
   by_cases hx0 : x = 0
@@ -423,18 +426,13 @@ lemma MvPolynomial.isUnit_C [NoZeroDivisors R] {x : R} :
 
 lemma MulEquiv.map_irreducible_iff {R S : Type*} [Semiring R] [Semiring S] (f : R ≃* S) {x : R} :
     Irreducible (f x) ↔ Irreducible x := by
-  simp only [irreducible_iff, MulEquiv.map_isUnit_iff, and_congr_right_iff]
-  intro hx
-  constructor
-  · rintro h a b rfl
-    simpa [MulEquiv.map_isUnit_iff] using h (f a) (f b) (by simp)
-  · rintro h a b hfx
-    simpa [MulEquiv.map_isUnit_iff] using h (f.symm a) (f.symm b)
-      (by simpa using congr_arg f.symm hfx)
+  simp only [irreducible_iff, isUnit_map_iff, and_congr_right_iff]
 
 lemma map_irreducible_iff {F R S : Type*} [Semiring R] [Semiring S] [EquivLike F R S]
     [RingEquivClass F R S] (f : F) {x : R} :
     Irreducible (f x) ↔ Irreducible x := (f : R ≃* S).map_irreducible_iff
+
+omit [Nontrivial R]
 
 lemma MvPolynomial.irreducible_X_sub_X [IsDomain R] {σ : Type*} {i j : σ} (hij : i ≠ j) :
     Irreducible (X i - X j : MvPolynomial σ R) := by
@@ -512,6 +510,7 @@ noncomputable def sylvesterMap {n m : ℕ} (P Q : Polynomial R)
   · simp [sylvesterMap]
   · simp [sylvesterMap, mul_assoc]
 
+variable [Nontrivial R]
 @[simp] lemma sylvesterMap_X_pow_zero {n m : ℕ} (P Q : Polynomial R)
     (hP : P.degree ≤ n) (hQ : Q.degree ≤ m) (i : Fin m) :
     sylvesterMap P Q hP hQ (⟨X ^ (i : ℕ), degreeLT_X_pow_mem R i⟩, 0) =
@@ -593,6 +592,7 @@ lemma resultant_ne_zero_iff {P Q : K[X]} :
   simpa [-Subtype.exists, -not_and, not_and']
     using not_iff_not.mpr (resultant_eq_zero_iff (P := P) (Q := Q))
 
+omit [Nontrivial R]
 @[simp] lemma resultant_C (P : Polynomial R) (x : R) :
     P.resultant (C x) = x ^ P.natDegree := by
   rw [resultant, sylvesterMatrix_C, det_diagonal, Fin.prod_const, natDegree_C, add_zero]
@@ -629,6 +629,7 @@ lemma zero_resultant (Q : Polynomial R) (hQ : Q.natDegree ≠ 0) :
     resultant 1 Q = 1 := by
   rw [← C.map_one, C_resultant, one_pow]
 
+variable [Nontrivial R]
 @[simp] lemma X_add_C_resultant_X_add_C (x y : R) :
     (X + C x).resultant (X + C y) = y - x := by
   rw [resultant_eq_det_sylvesterMatrix (natDegree_X_add_C _) (natDegree_X_add_C _),
@@ -653,6 +654,7 @@ lemma resultant_eq_comb (P Q : K[X]) (hPQ : 0 < P.natDegree + Q.natDegree):
   refine ⟨b, a, ?_⟩
   simpa [Subtype.ext_iff, add_comm] using hab
 
+omit [Nontrivial R]
 lemma resultant_swap (P Q : Polynomial R) :
     P.resultant Q = (-1) ^ (P.natDegree * Q.natDegree) * Q.resultant P := by
   rw [resultant, sylvesterMatrix, sylvesterMatrixAux, resultant, sylvesterMatrix,
@@ -1128,6 +1130,7 @@ theorem prod_root_differences_dvd_resultantPolynomialRoots [DecidableEq ι] [Dec
           · exact isRoot_prod_X_sub_C.mpr ⟨i, Finset.mem_univ _, rfl⟩
           · exact isRoot_prod_X_sub_C.mpr ⟨j, Finset.mem_univ _, hij⟩)))
 
+omit [Fintype ι] [Fintype κ] in
 lemma Finset.prod_prod_sub_swap (s : Finset ι) (t : Finset κ) (f : ι → R) (g : κ → R) :
     ∏ i in s, ∏ j in t, (f i - g j) = (-1) ^ (s.card * t.card) * ∏ j in t, ∏ i in s, (g j - f i) := by
   rw [prod_comm, pow_mul, ← prod_const, ← prod_mul_distrib, prod_congr rfl (fun j _ => ?_)]
@@ -1244,7 +1247,7 @@ lemma MvPolynomial.coeff_zero_lead_resultantPolynomialCoeff :
           simp [sylvesterMatrixVec, sylvesterVec_def, h, h']
         · simp only [Finsupp.coe_add, Pi.add_apply, ne_eq, not_false_eq_true,
             Finsupp.single_eq_of_ne, Finsupp.single_apply, Sum.inr.injEq, Fin.ext_iff, Fin.val_last,
-            zero_add, ite_eq_right_iff]
+            zero_add, ite_eq_right_iff, reduceCtorEq]
           obtain (hlt | heq) := h.lt_or_eq
           · intro hn
             have := (Nat.sub_lt_right_of_lt_add h' hlt).ne'
@@ -1267,7 +1270,7 @@ lemma MvPolynomial.coeff_zero_lead_resultantPolynomialCoeff :
           simp [sylvesterMatrixVec, sylvesterVec_def, h, h']
         · simp only [Finsupp.coe_add, Pi.add_apply, Finsupp.single_apply, Sum.inl.injEq,
             Fin.ext_iff, Fin.val_zero, ne_eq, not_false_eq_true, Finsupp.single_eq_of_ne, add_zero,
-            ite_eq_right_iff, if_false]
+            ite_eq_right_iff, if_false, reduceCtorEq]
           rw [eq_comm, tsub_eq_zero_iff_le]
           intro h''
           exact (hi (le_antisymm h'' h')).elim
@@ -1304,7 +1307,7 @@ lemma MvPolynomial.coeff_inl_resultantPolynomialRoots [Nonempty ι] [Nonempty κ
     simp only [Finsupp.coe_add, Pi.add_apply, Finset.prod_singleton, Sum.elim_inl, Fin.snoc_apply_zero,
       Fintype.card_ne_zero, ↓reduceDIte, coeffOfRoots_zero, rename_monomial, Finsupp.single_eq_same, ne_eq,
       not_false_eq_true, Finsupp.single_eq_of_ne, add_zero, monomial_pow, Sum.elim_inr, Fin.snoc_last, zero_add, one_pow,
-      mul_one, coeff_monomial, mul_ite, mul_zero]
+      mul_one, coeff_monomial, mul_ite, mul_zero, reduceCtorEq]
     rw [if_pos, ← pow_mul, ← mul_pow, neg_mul_neg, one_mul, one_pow]
     · ext (i | j)
       · simp [Finsupp.mapDomain_apply Sum.inl_injective]
@@ -1326,7 +1329,7 @@ lemma MvPolynomial.coeff_inl_resultantPolynomialRoots [Nonempty ι] [Nonempty κ
       rw [coeff_eq_zero_of_dvd_of_support (this _ (Finsupp.mem_support_iff.mpr hbi))]
       intro m hm
       rw [Sum.elim_inr, Fin.snoc_castSucc, not_mem_support_iff, coeffOfRoots, _root_.map_mul,
-        ← C.map_one, ← C.map_neg (1 : R), ← map_pow C, rename_C, coeff_C_mul]
+        ← C.map_one, ← C.map_neg (1 : R), ← C_pow, rename_C, coeff_C_mul]
       simp only [esymm_eq_sum_monomial, map_sum, coeff_sum, mul_eq_zero, pow_eq_zero_iff',
         neg_eq_zero, one_ne_zero, ne_eq, false_and, false_or]
       rw [Finset.sum_eq_zero]
@@ -1472,6 +1475,7 @@ lemma resultant_eq_prod_roots [Infinite K] -- TODO: should work over `ℤ`
   · simpa
   · simpa [natDegree_C_mul hy]
 
+omit [Fintype ι] [Fintype κ]
 lemma Multiset.toList_cons (a : ι) (s : Multiset ι) :
     (a ::ₘ s).toList.Perm (a :: s.toList) := by
   rw [← coe_eq_coe, coe_toList, ← cons_coe, coe_toList]

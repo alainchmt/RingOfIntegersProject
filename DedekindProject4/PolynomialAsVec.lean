@@ -1,4 +1,5 @@
 import Mathlib.Algebra.Polynomial.BigOperators
+import Mathlib.Tactic.FinCases
 
 variable {R : Type*}
 

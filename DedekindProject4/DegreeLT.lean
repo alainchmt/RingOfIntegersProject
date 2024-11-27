@@ -25,12 +25,13 @@ lemma degreeLT.basis_apply (n : ℕ) (i : Fin n) :
   simp only [degreeLT.basis, degreeLTEquiv, Basis.coe_ofEquivFun,
     LinearEquiv.coe_symm_mk]
   rw [Finset.sum_eq_single i (by aesop) (by aesop),
-      Function.update_same, monomial_one_right_eq_X_pow]
+      Pi.single_eq_same, monomial_one_right_eq_X_pow]
 
 @[simp] lemma degreeLT.basis_val (n : ℕ) (i : Fin n) :
     (degreeLT.basis R n i : R[X]) = X ^ i.val :=
   congr_arg _ (degreeLT.basis_apply R n i)
 
+omit [Nontrivial R] in
 @[simp] lemma degreeLT.basis_repr {n} (P : R[x]_n) (i : Fin n) :
     (degreeLT.basis R n).repr P i = (P : R[X]).coeff i :=
   Basis.ofEquivFun_repr_apply _ _ _
@@ -62,6 +63,7 @@ noncomputable def degreeLT.addLinearEquiv {n m : ℕ} :
 
 end degreeLT
 
+omit [Nontrivial R]
 @[aesop unsafe 50%]
 theorem degree_add_lt_of_degree_lt {p q : R[X]} {n : ℕ}
     (hp : degree p < n) (hq : degree q < n) :

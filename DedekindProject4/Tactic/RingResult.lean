@@ -1,8 +1,8 @@
-import Mathlib.Tactic.Ring
+import DedekindProject4.Tactic.RingModChar
 
 open Lean Mathlib Meta Qq Tactic
 
-namespace Mathlib.Tactic.Ring
+namespace Mathlib.Tactic.RingModChar
 
 open AtomM
 open Ring
@@ -41,7 +41,7 @@ partial def ExBase.evalIntCast (va : ExBase sℤ a) : AtomM (Result (ExBase sα)
   match va with
   | .atom _ => do
     let a' : Q($R) := q($a)
-    let i ← addAtom a'
+    let (i, a') ← addAtom a'
     pure ⟨a', ExBase.atom i, (q(Eq.refl $a') : Expr)⟩
   | .sum va => do
     let ⟨_, vc, p⟩ ← va.evalIntCast
@@ -52,7 +52,7 @@ partial def ExBase.evalIntCast (va : ExBase sℤ a) : AtomM (Result (ExBase sα)
 * `↑c = c` if `c` is a numeric literal
 * `↑(a ^ n * b) = ↑a ^ n * ↑b`
 -/
-partial def ExProd.evalIntCast (va : Ring.ExProd sℤ a) : AtomM (Ring.Result (Ring.ExProd sα) q($a)) :=
+partial def ExProd.evalIntCast (va : RingModChar.ExProd sℤ a) : AtomM (RingModChar.Result (RingModChar.ExProd sα) q($a)) :=
   match va with
   | .const c hc => do
     -- TODO: reduce modulo the characteristic
@@ -74,7 +74,7 @@ partial def ExProd.evalIntCast (va : Ring.ExProd sℤ a) : AtomM (Ring.Result (R
 * `↑0 = 0`
 * `↑(a + b) = ↑a + ↑b`
 -/
-partial def ExSum.evalIntCast (va : Ring.ExSum sℤ a) : AtomM (Ring.Result (Ring.ExSum sα) q($a)) :=
+partial def ExSum.evalIntCast (va : RingModChar.ExSum sℤ a) : AtomM (RingModChar.Result (RingModChar.ExSum sα) q($a)) :=
   match va with
   | .zero => do
     have : ((@Semiring.toMonoidWithZero _ Ring.toSemiring).toZero (M₀ := $R)) =Q CommMonoidWithZero.toZero (M₀ := $R) := ⟨⟩
@@ -96,7 +96,7 @@ polynomial expressions.
 
 * `a • b = a * b` if `α = ℤ`
 -/
-def evalZSMulInt (va : Ring.ExSum sℤ a) (vb : Ring.ExSum sℤ b) : AtomM (Ring.Result (Ring.ExSum sℤ) q($a • $b)) := do
+def evalZSMulInt (va : RingModChar.ExSum sℤ a) (vb : RingModChar.ExSum sℤ b) : AtomM (RingModChar.Result (RingModChar.ExSum sℤ) q($a • $b)) := do
   let ⟨_, vc, pc⟩ := evalMul sℤ 0 none none va vb
   pure ⟨_, vc, q(smul_int $pc)⟩
 
@@ -106,7 +106,7 @@ polynomial expressions.
 * `a • b = a * b` if `α = ℤ`
 * `a • b = ↑a * b` otherwise
 -/
-def evalZSMul (va : Ring.ExSum sℤ a) (vb : Ring.ExSum sα b) : AtomM (Ring.Result (Ring.ExSum sα) q($a • $b)) := do
+def evalZSMul (va : RingModChar.ExSum sℤ a) (vb : RingModChar.ExSum sα b) : AtomM (RingModChar.Result (RingModChar.ExSum sα) q($a • $b)) := do
   if ← isDefEq sα sℤ then
     let ⟨_, va'⟩ := va.cast
     have _b : Q(ℤ) := b
@@ -118,7 +118,7 @@ def evalZSMul (va : Ring.ExSum sℤ a) (vb : Ring.ExSum sα b) : AtomM (Ring.Res
     let ⟨_, vc, pc⟩ := evalMul sα char rR cpR va' vb
     pure ⟨_, vc, (q(int_smul_eq_cast $pa' (Eq.trans (by congr) $pc)) : Expr)⟩
 
-end Mathlib.Tactic.Ring
+end Mathlib.Tactic.RingModChar
 
 /-- If `a = b` and we can evaluate `b`, then we can evaluate `a`. -/
 def Mathlib.Meta.NormNum.Result.eq_trans {α : Q(Type u)} {a b : Q($α)} (eq : Q($a = $b)) :
@@ -173,7 +173,7 @@ instance : MResultClass MetaM @NormNum.Result where
 instance [MResultClass m r] : Inhabited (m (r e)) where
   default := MResultClass.rflM
 
-structure Result {α : Q(Type u)} (e : Q($α)) :=
+structure Result {α : Q(Type u)} (e : Q($α)) where
   (val : Q($α))
   (pf : Q($e = $val))
 
@@ -203,7 +203,7 @@ def Result.rfl {α : Q(Type u)} (e : Q($α)) : Result e where
   pf := q(rfl)
 
 def RingResult {α : Q(Type u)} (csr : Q(CommSemiring $α)) (e : Q($α)) : Type :=
-  Ring.Result (Ring.ExSum csr) e
+  RingModChar.Result (RingModChar.ExSum csr) e
 
 def RingResult.toResult {α : Q(Type u)} {e : Q($α)}
     (res : RingResult csr e) : Result e where
@@ -221,8 +221,8 @@ def RingResult.eqTrans {α : Q(Type u)} {e e' : Q($α)} (pf : Q($e' = $e))
 
 def RingResult.mkRfl {α : Q(Type u)} (csr : Q(CommSemiring $α)) (e : Q($α)) :
     AtomM (RingResult csr e) := do
-  let cache ← Ring.mkCache _ {}
-  Ring.eval _ cache e
+  let cache ← RingModChar.mkCache _ {}
+  RingModChar.eval _ cache e
 
 def _root_.Lean.Meta.Simp.Result.toResult {α : Q(Type u)} {e : Q($α)} (r : Simp.Result) :
     Result e :=
@@ -258,7 +258,7 @@ instance (e) : ToMessageData (RingResult instCSrR e) where
 
 structure CommSemiringResult (m : Type → Type) (r : {u : Level} → {α : Q(Type u)} → (e : Q($α)) → Type)
     [MResultClass m r] (R : Q(Type u))
-    (instCSrR : Q(CommSemiring «$R») := by with_reducible assumption) :=
+    (instCSrR : Q(CommSemiring «$R») := by with_reducible assumption) where
   (char : ℕ) (instCPR : Option Q(CharP $R $char))
   (mkZero : r q((0 : $R))) (mkOne : r q((1 : $R)))
   (mkNSMul : ∀ (n : Q(ℕ)) {b : Q($R)}, r b → m (r (α := R) q($n • $b)))
@@ -269,30 +269,30 @@ variable {R : Q(Type u)} (instCSrR : Q(CommSemiring $R) := by with_reducible ass
 variable (char : ℕ) (rR : Option (Q(Ring $R))) (cpR : Option (Q(CharP $R $char)))
 
 def CommSemiring.mkZero : RingResult instCSrR q((0 : $R)) :=
-  ⟨q(0), .zero, q(Ring.cast_zero ⟨by simp⟩)⟩
+  ⟨q(0), .zero, q(RingModChar.cast_zero ⟨by simp⟩)⟩
 
 def CommSemiring.mkOne : RingResult instCSrR q((1 : $R)) :=
-  ⟨_, (Ring.ExProd.mkNat instCSrR 1).2.toSum, q(Ring.cast_pos ⟨by simp⟩)⟩
+  ⟨_, (RingModChar.ExProd.mkNat instCSrR 1).2.toSum, q(RingModChar.cast_pos ⟨by simp⟩)⟩
 
 def CommSemiring.mkNSMul
     (n : Q(ℕ)) {b : Q($R)} (rb : RingResult instCSrR b) :
     AtomM (RingResult instCSrR q($n • $b)) := do
   let n' ← RingResult.mkRfl _ n
-  let r : RingResult _ _ ← Ring.evalNSMul instCSrR char rR cpR n'.val rb.val
+  let r : RingResult _ _ ← RingModChar.evalNSMul instCSrR char rR cpR n'.val rb.val
   RingResult.eqTrans q(congr_arg₂ _ $n'.proof $rb.proof) r
 
 def CommSemiring.mkAdd
     {a b : Q($R)} (ra : RingResult instCSrR a) (rb : RingResult instCSrR b) :
     MetaM (RingResult instCSrR q($a + $b)) := do
   -- TODO: we can use the characteristic of the ring here
-  let r := Ring.evalAdd instCSrR char rR cpR ra.val rb.val
+  let r := RingModChar.evalAdd instCSrR char rR cpR ra.val rb.val
   RingResult.eqTrans q(congr_arg₂ _ $ra.proof $rb.proof) r
 
 def CommSemiring.mkMul
     {a b : Q($R)} (ra : RingResult instCSrR a) (rb : RingResult instCSrR b) :
     MetaM (RingResult instCSrR q($a * $b)) := do
   -- TODO: we can use the characteristic of the ring here
-  let r := Ring.evalMul instCSrR char rR cpR ra.val rb.val
+  let r := RingModChar.evalMul instCSrR char rR cpR ra.val rb.val
   RingResult.eqTrans q(congr_arg₂ _ $ra.proof $rb.proof) r
 
 def CommSemiringResult.ringResult : CommSemiringResult AtomM (RingResult instCSrR) R where
@@ -308,7 +308,7 @@ structure CommRingResult (m : Type → Type) (r : {u : Level} → {α : Q(Type u
     [MResultClass m r] (R : Q(Type u))
     (instCSrR : Q(CommSemiring «$R») := by with_reducible assumption)
     (instCRR : Q(CommRing «$R») := by with_reducible assumption)
-    extends CommSemiringResult m r R instCSrR :=
+    extends CommSemiringResult m r R instCSrR where
   (mkZSMul : ∀ (n : Q(ℤ)) {b : Q($R)}, r b → m (r (α := R) q($n • $b)))
   (mkNeg : ∀ {b : Q($R)}, r b → m (r q(- $b)))
   (mkSub : ∀ {a b : Q($R)}, r a → r b → m (r (α := R) q($a - $b)))
@@ -318,7 +318,7 @@ def CommRing.mkZSMul
      (n : Q(ℤ)) {b : Q($R)} (rb : RingResult instCSrR b) :
     AtomM (RingResult instCSrR q($n • $b)) := do
   let n' ← RingResult.mkRfl _ n
-  let r : RingResult _ _ ← Ring.evalZSMul instCSrR q(($instCRR).toRing) char cpR n'.val rb.val
+  let r : RingResult _ _ ← RingModChar.evalZSMul instCSrR q(($instCRR).toRing) char cpR n'.val rb.val
   let res ← RingResult.eqTrans q(congr_arg₂ _ $n'.proof $rb.proof) r
   pure res
 
@@ -326,7 +326,7 @@ def CommRing.mkNeg
     (instCRR : Q(CommRing $R) := by with_reducible assumption)
     {b : Q($R)} (rb : RingResult instCSrR b) :
     MetaM (RingResult instCSrR q(- $b)) := do
-  let r : RingResult _ _ := Ring.evalNeg instCSrR char cpR q(($instCRR).toRing) rb.val
+  let r : RingResult _ _ := RingModChar.evalNeg instCSrR char cpR q(($instCRR).toRing) rb.val
   RingResult.eqTrans q(congr_arg _ $rb.proof) r
 
 def CommRing.mkSub
@@ -334,7 +334,7 @@ def CommRing.mkSub
     {a b : Q($R)} (ra : RingResult instCSrR a) (rb : RingResult instCSrR b) :
     MetaM (RingResult instCSrR q($a - $b)) := do
   -- TODO: we can use the characteristic of the ring here
-  let r : RingResult _ _ := Ring.evalSub instCSrR char cpR q(($instCRR).toRing) ra.val rb.val
+  let r : RingResult _ _ := RingModChar.evalSub instCSrR char cpR q(($instCRR).toRing) ra.val rb.val
   RingResult.eqTrans q(congr_arg₂ _ $ra.proof $rb.proof) r
 
 def CommRingResult.ringResult

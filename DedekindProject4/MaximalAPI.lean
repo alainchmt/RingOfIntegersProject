@@ -26,8 +26,7 @@ lemma nonempty_sum_of_pos {n m : ℕ } (h : 0 < m + n) : Nonempty ((Fin m) ⊕ (
 
 section Proofs
 
-variable  {p t : ℕ}  [Fact $ Nat.Prime p] {O : Type*} [CommRing O] [Nontrivial O]
-  [NoZeroSMulDivisors ℤ O] [Module.Free ℤ O] (B : Basis (Fin (m + n)) ℤ O)
+variable {p t : ℕ} [Fact $ Nat.Prime p] {O : Type*} [CommRing O] (B : Basis (Fin (m + n)) ℤ O)
 
 lemma v_linearIndependent {k : ℕ} (v : Fin k → (Fin (m + n) → (ZMod p))) (v_ind : Fin k → Fin (m + n))
   (hindv : ∀ i , v i (v_ind i) ≠ 0 ∧ (∀ j , j ≠ i → v j (v_ind i) = 0)) :
@@ -38,11 +37,11 @@ lemma v_linearIndependent {k : ℕ} (v : Fin k → (Fin (m + n) → (ZMod p))) (
   intro i
   use (v_ind i)
   constructor
-  · simp only [Basis.repr_symm_apply, Basis.repr_total, Finsupp.equivFunOnFinite_symm_apply_toFun,
+  · simp only [Basis.repr_symm_apply, Basis.repr_linearCombination, Finsupp.equivFunOnFinite_symm_apply_toFun,
       ne_eq]
     exact (hindv i).1
   · intro k hk
-    simp only [Basis.repr_symm_apply, Basis.repr_total, Finsupp.equivFunOnFinite_symm_apply_toFun]
+    simp only [Basis.repr_symm_apply, Basis.repr_linearCombination, Finsupp.equivFunOnFinite_symm_apply_toFun]
     exact (hindv i).2 k hk
 
 local notation "Ip" =>  Ideal.radical ((p : O) • (⊤ : Submodule O O) : Ideal O)
@@ -52,7 +51,7 @@ local notation "R" =>   O ⧸ (p : O) • (⊤ : Submodule O O)
 local notation x "mod''" p => (Ideal.Quotient.mk ((p : O) • (⊤ : Submodule O O))) x
 local notation I "mod'''" p => Submodule.map (quotientMkToSemilinear O O p) (Submodule.restrictScalars ℤ I)
 
-lemma wFrob_linearIndependent (w : Fin n → (Fin (m + n) → (ZMod p))) (w_ind : Fin n → Fin (m + n))
+lemma wFrob_linearIndependent [Nontrivial O] [Module.Free ℤ O] (w : Fin n → (Fin (m + n) → (ZMod p))) (w_ind : Fin n → Fin (m + n))
     (wFrob : Fin n → (Fin (m + n) → (ZMod p)))
     (hindw : ∀ i , wFrob i (w_ind i) ≠ 0 ∧ (∀ j , j ≠ i → wFrob j (w_ind i) = 0))
     (hwFrobComp : ∀ j, ( ((basis_zmodp_algebra O p B).equivFun.symm).toFun (w j)) ^ (p ^ t) =
@@ -79,10 +78,12 @@ lemma v_is_reduced_mod {k : ℕ} (b1 : Fin k → (Fin (m + n) → ℤ))
   ext s
   rw [← basis_zmodp_repr_eq_zmodp_basis_repr O p B (((B.equivFun.symm).toFun) (b1 i))]
   simp_rw [LinearEquiv.toFun_eq_coe, Basis.equivFun_symm_eq_repr_symm']
-  simp only [Basis.repr_symm_apply, Basis.repr_total,
+  simp only [Basis.repr_symm_apply, Basis.repr_linearCombination,
     Finsupp.equivFunOnFinite_symm_apply_toFun, Function.comp_apply]
   rw [ ← (hmod1 i)]
   rfl
+
+variable [Nontrivial O] [Module.Free ℤ O]
 
 lemma v_in_Frob_ker {k : ℕ} (v : Fin k → (Fin (m + n) → (ZMod p)))
   (hvFrobKer : ∀ i,  ( ((basis_zmodp_algebra O p B).equivFun.symm).toFun (v i)) ^ (p ^ t) = 0 ) :
@@ -115,7 +116,10 @@ lemma rad_eq_smul_top_of_CertificateOfUnramified
   exact Ideal.Quotient.eq_zero_iff_mem.1 aux
 
 
-lemma zsmul_p_aux {a : O} : (p : ℤ) • a = p * a := by rw [zsmul_eq_mul] ; norm_cast
+omit [Fact (Nat.Prime p)] [Nontrivial O] [Module.Free ℤ O] in
+lemma zsmul_p_aux {a : O} : (p : ℤ) • a = p * a := by
+  rw [zsmul_eq_mul]
+  norm_cast
 
 variable
 [Nonempty (Fin m ⊕ Fin n)]
@@ -149,6 +153,7 @@ noncomputable def BasisRadMod : Basis (Fin m ⊕ Fin n) (ZMod p) (Ip mod' p) := 
   · exact v_in_Frob_ker B v hvFrobKer
 
 
+include v w hle hmod1 hindv hindw hvFrobKer hwFrobComp in
 lemma aux_in_Ip (k : Fin m ⊕ Fin n):
    Sum.elim (λ i => ((B.equivFun.symm).toFun) (b1 i)) (↑(p : Fin n → O )  *
     (λ j => ((B.equivFun.symm).toFun) (b2 j))) k ∈ Ip := by
@@ -196,6 +201,7 @@ variable
   Finset.univ.sum (λ l => (d i j l) • ((λ k => (B.equivFun.symm).toFun (b1 k)) l)) +
     Finset.univ.sum (λ l => (e i j l) • ((p : ℤ) • ((λ k => (B.equivFun.symm).toFun (b2 k)) l)))  )
 
+include B g b1 b2 hle v w wFrob v_ind w_ind hmod1 hmod2 hindv hindw hvFrobKer hwFrobComp hindab hmul1 hmul2 in
 /-- Given the certifying data, the map `map_to_end_lin` has trivial kernel· -/
 lemma ker_map_eq_bot_of_data : LinearMap.ker (map_to_end_lin O p) = ⊥ := by
   let g' := (λ i => (B.equivFun.symm).toFun (g i))
@@ -236,6 +242,7 @@ lemma ker_map_eq_bot_of_data : LinearMap.ker (map_to_end_lin O p) = ⊥ := by
 
 -- Linear independence by evaluating `n` endomorphisms at a single witness.
 
+include B b1 b2 hle v w wFrob v_ind w_ind hmod1 hindv hindw hvFrobKer hwFrobComp in
 lemma sum_in_Ip (wit1 : Fin m → ℤ) (wit2 : Fin n → ℤ) : Finset.univ.sum (λ l => (wit1 l) • ((λ k => (B.equivFun.symm).toFun (b1 k)) l)) +
     Finset.univ.sum (λ l => (wit2 l) • ((p : ℤ) • ((λ k => (B.equivFun.symm).toFun (b2 k)) l))) ∈ Ip := by
   let b1' := (λ j => ( ((B.equivFun.symm).toFun) (b1 j)))
@@ -264,6 +271,7 @@ variable
       ∀ k , k ≠ i → (algebraMap ℤ (ZMod p)) ((Sum.elim (fun j => aw k j) (fun j => cw k j)) (ac_indw i)) = 0))
 
 
+include B g b1 b2 hle v w wFrob v_ind w_ind hmod1 hmod2 hindv hindw hvFrobKer hwFrobComp wit1 wit2 hacindw hmulw in
 /-- Given the certifying data, the map `map_to_end_lin` has trivial endomorphism· -/
 lemma ker_map_eq_bot_of_data_witness : LinearMap.ker (map_to_end_lin O p) = ⊥ := by
   let g' := (λ i => (B.equivFun.symm).toFun (g i))
@@ -310,8 +318,8 @@ section ProofLists
   times table·  -/
 
 
-variable {p t : ℕ}  [hp : Fact $ Nat.Prime p] {O : Type*} [CommRing O]
-  [Nontrivial O] [NoZeroSMulDivisors ℤ O] [Module.Free ℤ O] (B : Basis (Fin (m + n)) ℤ O)
+variable {p t : ℕ} {O : Type*} [CommRing O]
+  (B : Basis (Fin (m + n)) ℤ O)
 
 variable
   (b1 : Fin m → (Fin (m + n) → ℤ))
@@ -332,7 +340,7 @@ lemma hmul_lists_aux (a1 : Fin m → ℤ ) (a2 : Fin n → ℤ  )
   have add_zero': ∀ (l : List ℤ) , l + 0 = l := by simp only [add_zero, implies_true]
   simp only [LinearEquiv.toFun_eq_coe, Basis.equivFun_symm_eq_repr_symm' B]
   apply_fun B.repr
-  simp only [Basis.repr_symm_apply, map_add, map_sum, map_smul, Basis.repr_total, smul_smul]
+  simp only [Basis.repr_symm_apply, map_add, map_sum, map_smul, Basis.repr_linearCombination, smul_smul]
   simp_rw [List.mulPointwise_ofFn] at h
   cases m
   · cases n
@@ -365,7 +373,6 @@ lemma hmul_lists_aux (a1 : Fin m → ℤ ) (a2 : Fin n → ℤ  )
       Finsupp.equivFunOnFinite_symm_apply_toFun, Pi.add_apply, Finset.sum_apply, Pi.mul_apply,
       Finsupp.coe_add, Finsupp.coe_finset_sum, Finsupp.coe_smul]
   exact LinearEquiv.injective B.repr
-
 
 lemma hmul_lists_aux_length (a1 : Fin m → ℤ ) (a2 : Fin n → ℤ  )
    : (List.sum (List.ofFn (λ l => List.mulPointwise (a1 l) (List.ofFn (b1 l)))) +
@@ -401,6 +408,10 @@ variable
   (heq : ∀ i j , T i j = List.ofFn (T' i j))
   (basisMulBasis: ∀ i j k , B.repr (B i * B j) k = T' i j k)
 
+variable [hp : Fact $ Nat.Prime p] [Nontrivial O] [NoZeroSMulDivisors ℤ O] [Module.Free ℤ O] 
+
+include T' basisMulBasis heq in
+omit hp [Nontrivial O] [NoZeroSMulDivisors ℤ O] [Module.Free ℤ O] in
 lemma hmul1_lists  (a : Fin (m + n) → Fin m → (Fin m → ℤ))
     (c : Fin (m + n) → Fin m → (Fin n → ℤ))
     (i : Fin (m + n)) (j : Fin m)
@@ -416,7 +427,8 @@ lemma hmul1_lists  (a : Fin (m + n) → Fin m → (Fin m → ℤ))
   rw [← table_mul_eq_table_mul' T' T heq, h] at hc'
   exact hmul_lists_aux B b1 b2 _ _ c' hc'
 
-
+include T' basisMulBasis heq in
+omit hp [Nontrivial O] [NoZeroSMulDivisors ℤ O] [Module.Free ℤ O] in
 lemma hmul2_lists (d : Fin (m + n) → Fin n → (Fin m → ℤ))
     (e : Fin (m + n) → Fin n → (Fin n → ℤ))
     (i : Fin (m + n)) (j : Fin n)
@@ -436,7 +448,8 @@ lemma hmul2_lists (d : Fin (m + n) → Fin n → (Fin m → ℤ))
   rw [← table_mul_eq_table_mul' T' T heq, h] at hcc
   exact hmul_lists_aux B b1 b2 _ _ c' hcc
 
-
+include T' basisMulBasis heq in
+omit hp [Nontrivial O] [NoZeroSMulDivisors ℤ O] [Module.Free ℤ O] in
 lemma hmul_lists_witness (wit1 : Fin m → ℤ) (wit2 : Fin n → ℤ)
   (aw : Fin (m + n) → (Fin m → ℤ)) (cw : Fin (m + n) → (Fin n → ℤ))
   (i : Fin (m + n))
@@ -461,12 +474,14 @@ lemma hmul_lists_witness (wit1 : Fin m → ℤ) (wit2 : Fin n → ℤ)
   rw [← table_mul_eq_table_mul' T' T heq, h] at hcc'
   erw [← hmul_lists_aux B b1 b2 _ _ _  hc'', table_mul_list_eq_mul T' B _ _ _ basisMulBasis hc']
   exact hmul_lists_aux B b1 b2 _ _ c' hcc'
-  rw [hmul_lists_aux_length B]
+  apply hmul_lists_aux_length
 
 variable
   (TMod : Fin (m + n) → Fin (m + n) → List (ZMod p))
   (hTMod : ∀ i j , List.map (algebraMap ℤ (ZMod p)) (T i j) = TMod i j)
 
+include basisMulBasis in
+omit [Nontrivial O] [NoZeroSMulDivisors ℤ O] [Module.Free ℤ O] in
 lemma basisModMulbasisMod : ∀ i j k,
   (basis_zmodp_algebra O p B).repr (((basis_zmodp_algebra O p B) i) * ((basis_zmodp_algebra O p B) j)) k =
   (fun i j k => (algebraMap ℤ (ZMod p) ((T' i j k)))) i j k:= by
@@ -474,6 +489,8 @@ lemma basisModMulbasisMod : ∀ i j k,
   erw [basis_zmodp_repr_mul_eq_zmodp_basis_repr_mul O p B i j k,
   Function.comp_apply, basisMulBasis i j k]
 
+include hTMod heq in
+omit [Nontrivial O] [NoZeroSMulDivisors ℤ O] [Module.Free ℤ O] in
 lemma THeqMod : ∀ i j, TMod i j = List.ofFn ((fun i j k => (algebraMap ℤ (ZMod p) ((T' i j k)))) i j)  := by
   intro i j
   rw [← hTMod, heq, List.map_ofFn, List.ofFn_inj]
@@ -484,6 +501,8 @@ variable
   (w : Fin n → (Fin (m + n) → (ZMod p)))
   (wFrob : Fin n → (Fin (m + n) → (ZMod p)))
 
+include hTMod heq basisMulBasis in
+omit [Nontrivial O] [NoZeroSMulDivisors ℤ O] [Module.Free ℤ O] in
 lemma hvFrobKer_lists (i : Fin m)
   (h : nPow_sq_table TMod (List.ofFn (v i)) (p ^ t) = List.replicate (m + n) 0) :
    (((basis_zmodp_algebra O p B).equivFun.symm) (v i)) ^ (p ^ t) = 0 := by
@@ -496,6 +515,8 @@ lemma hvFrobKer_lists (i : Fin m)
    simp only [AddHom.toFun_eq_coe, LinearMap.coe_toAddHom, LinearEquiv.coe_coe,
      Basis.equivFun_symm_apply, zero_smul, Finset.sum_const_zero]
 
+include hTMod heq basisMulBasis in
+omit [Nontrivial O] [NoZeroSMulDivisors ℤ O] [Module.Free ℤ O] in
 lemma hwFrobComp_lists (j : Fin n)
   (h : nPow_sq_table TMod (List.ofFn (w j)) (p ^ t) = List.ofFn (wFrob j)) :
   ( ((basis_zmodp_algebra O p B).equivFun.symm) (w j)) ^ (p ^ t) =
@@ -551,6 +572,7 @@ variable
 
 local notation "O*" => Subalgebra.toSubmodule (AlgHom.range (Subalgebra.inclusion hm))
 
+include hpos B hpI B' hle b1 b2 v w wFrob v_ind w_ind hmod1 hmod2 hindv hindw hvFrobKer hwFrobComp g a c d e ab_ind hindab hmul1 hmul2
 lemma pMaximal_of_data [Module.Free ℤ Om] [Module.Finite ℤ Om]: piMaximal (p : ℤ)  O* := by
   haveI := nonempty_sum_of_pos hpos
   haveI := Module.Free.of_basis B
@@ -559,7 +581,7 @@ lemma pMaximal_of_data [Module.Free ℤ Om] [Module.Finite ℤ Om]: piMaximal (p
     use (B ( ⟨0, hpos⟩ : Fin (m + n))) , 0
     apply Basis.ne_zero
   have : (algebraMap ℤ O p) = (p : O) := by norm_num
-  refine order_piMaximal_of_order_eq_multiplierRing hm (Nat.prime_iff_prime_int.mp hpI.out) ?_ ?_
+  refine order_piMaximal_of_order_eq_multiplierRing hm (Nat.prime_iff_prime_int.mp hpI.out) ?_ ?_ 
   rw [rank_eq_card_basis B, rank_eq_card_basis B']
   rw [this]
   refine mult_ring_eq_ring_of_trivial_ker_map_to_end_lin O p ?_
@@ -580,7 +602,8 @@ variable
 (hacindw : ∀ i , ((algebraMap ℤ (ZMod p)) ((Sum.elim (fun j => aw i j) (fun j => cw i j)) (ac_indw i)) ≠ 0 ∧
       ∀ k , k ≠ i → (algebraMap ℤ (ZMod p)) ((Sum.elim (fun j => aw k j) (fun j => cw k j)) (ac_indw i)) = 0))
 
-
+include wit1 wit2 aw cw hmulw ac_indw hacindw in
+omit hindab hmul1 hmul2 a c d e ab_ind in
 lemma pMaximal_of_data_witness [Module.Free ℤ Om] [Module.Finite ℤ Om]: piMaximal (p : ℤ)  O* := by
   haveI := nonempty_sum_of_pos hpos
   haveI := Module.Free.of_basis B
@@ -602,8 +625,8 @@ end Data
 
 section Certificate
 
-variable {K : Type*} (p : ℕ) [CommRing K] [CommRing K] [NoZeroSMulDivisors ℤ K]
-  [hpI : Fact $ Nat.Prime p]  (O : Subalgebra ℤ K) (Om : Subalgebra ℤ K)
+variable {K : Type*} (p : ℕ) [CommRing K] [NoZeroSMulDivisors ℤ K]
+  [hpI : Fact $ Nat.Prime p] (O : Subalgebra ℤ K) (Om : Subalgebra ℤ K)
   (hm : O ≤ Om)
 
 local notation "O*" => Subalgebra.toSubmodule (AlgHom.range (Subalgebra.inclusion hm))
@@ -634,7 +657,7 @@ and `n ^ 2` identities in `O` :
 - `ab_ind` : indices to check for linear independence of
   the matrices representing endomorphisms of `Iₚ/pIₚ` -/
 
-structure MaximalOrderCertificateLists {K : Type*} [CommRing K] [CommRing K] [NoZeroSMulDivisors ℤ K]
+structure MaximalOrderCertificateLists {K : Type*} [CommRing K] [NoZeroSMulDivisors ℤ K]
   (p : ℕ) [hpI : Fact $ Nat.Prime p] (O : Subalgebra ℤ K) (Om : Subalgebra ℤ K) (hm : O ≤ Om) where
   m : ℕ
   n : ℕ
@@ -676,7 +699,7 @@ structure MaximalOrderCertificateLists {K : Type*} [CommRing K] [CommRing K] [No
 
 /-- A shorter certificate for `p`-maximality, which exists if `Iₚ = pO` (i.e· `p` is unramified).
 See `MaximalOrderCertificateLists` for details·  -/
-structure MaximalOrderCertificateOfUnramifiedLists {K : Type*} [CommRing K] [CommRing K] [NoZeroSMulDivisors ℤ K]
+structure MaximalOrderCertificateOfUnramifiedLists {K : Type*} [CommRing K] [NoZeroSMulDivisors ℤ K]
   (p : ℕ) [hpI : Fact $ Nat.Prime p] (O : Subalgebra ℤ K) (Om : Subalgebra ℤ K) (hm : O ≤ Om) where
   n : ℕ
   t : ℕ

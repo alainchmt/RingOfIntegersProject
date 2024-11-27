@@ -1,7 +1,7 @@
-import DedekindProject4.DedekindCriteria
 import DedekindProject4.CertifyKernel
+import DedekindProject4.DedekindCriteria
 import DedekindProject4.Semilinear
-import Mathlib.Data.ZMod.Algebra
+import Mathlib.Data.ZMod.Basic
 
 /-!
 
@@ -99,11 +99,11 @@ noncomputable def radicalFullRank {O τ R: Type*} [CommRing R] [IsDomain R][IsPr
     intro x hx
     simp only [Submodule.restrictScalars_mem] at hx ⊢
     exact Ideal.le_radical hx
-  have aux2 := Submodule.finrank_le_finrank_of_le aux1
-  erw [FiniteDimensional.finrank_eq_card_basis b'] at aux2
-  rw [FiniteDimensional.finrank_eq_card_basis b] at aux0
+  have aux2 := Submodule.finrank_mono aux1
+  erw [Module.finrank_eq_card_basis b'] at aux2
+  rw [Module.finrank_eq_card_basis b] at aux0
   have aux3 := LE.le.antisymm aux0 aux2
-  rw [FiniteDimensional.finrank_eq_card_basis B] at aux3
+  rw [Module.finrank_eq_card_basis B] at aux3
   exact Basis.reindex B (Fintype.equivOfCardEq aux3)
 
 /-- A basis for the radical of `p • O`· -/
@@ -136,7 +136,7 @@ local notation x "mod" n => (@Submodule.Quotient.mk R M _ _ _ ((n: R) • (⊤ :
 
 lemma smul_p_eq_zero (b : M mod' n) :  n • b = 0 := by
   choose c hc using (Submodule.Quotient.mk_surjective _ b)
-  rw [← hc, ← Submodule.Quotient.mk_smul, Submodule.Quotient.mk_eq_zero, nsmul_eq_smul_cast R ]
+  rw [← hc, ← Submodule.Quotient.mk_smul, Submodule.Quotient.mk_eq_zero, ← Nat.cast_smul_eq_nsmul R]
   rw [smul_top_mem_iff_eq_smul _ _]
   use c
 
@@ -235,7 +235,7 @@ lemma semilinear_ker_le_ker [NeZero n] :
   erw [LinearMap.mem_ker, Submodule.Quotient.mk_eq_zero, smul_top_mem_iff_eq_smul ]  at hx
   obtain ⟨a, ha⟩ := hx
   have : (↑ (↑n : ℤ ) : R) = (↑n : R) := by norm_cast
-  rw [ ← this, intCast_smul (n : ℤ) a] at ha
+  rw [← this, Int.cast_smul_eq_zsmul _ (n : ℤ) a] at ha
   rw [← ha]
   refine Submodule.smul_mem_smul  ?_ (Submodule.mem_top )
   rw [ZMod.ker_intCastRingHom]
@@ -365,7 +365,7 @@ local notation x "mod p"  => (Ideal.Quotient.mk ((p : O) • (⊤ : Submodule O 
 local notation "Ip" => Ideal.radical ((p : O) • (⊤ : Submodule O O) : Ideal O)
 
 /- `x` is in `Ip / pO` if and only if `x ^ (p ^ j) = 0` with ` n ≤ p ^ j`· -/
-lemma radical_eq_kernel_iter_frob_aux (n j: ℕ) [CommRing O][Fact $ Nat.Prime p]
+lemma radical_eq_kernel_iter_frob_aux (n j: ℕ) [Fact $ Nat.Prime p]
     (b : Basis (Fin n) ℤ O ) (hle : n ≤ p ^ j) (x : R) :
     x ∈ (Ip mod' p) ↔ x ^ (p ^ j) = 0 := by
   haveI := Module.Finite.of_basis (basis_zmodp_algebra O p b)
@@ -412,7 +412,7 @@ lemma radical_eq_kernel_iter_frob_aux (n j: ℕ) [CommRing O][Fact $ Nat.Prime p
     exact Matrix.charpoly_monic _
 
 /- The kernel of the iterated Frobenius map is equal to `Ip / pO`· -/
-lemma radical_eq_kernel_iter_frob (n j : ℕ)[CommRing O] [Fact $ Nat.Prime p] [Nontrivial O] [Module.Free ℤ O]
+lemma radical_eq_kernel_iter_frob (n j : ℕ) [Fact $ Nat.Prime p] [Nontrivial O] [Module.Free ℤ O]
     (b : Basis (Fin n) ℤ O ) (hle : n ≤ p ^ j) : (Ip mod' p) = LinearMap.ker ((Frob R p) ^ j) := by
   { ext x ; erw [LinearMap.mem_ker ,  iter_Frob]; exact radical_eq_kernel_iter_frob_aux O p n j b hle x }
 
@@ -442,6 +442,7 @@ lemma p_smul_top (y : O) (x : O) :
     x ∈  (y : O) • (⊤ : Submodule O O) ↔ ∃ (a : O), y • a = x := by
   exact smul_top_mem_iff_eq_smul y x
 
+omit hpI in
 lemma ideal_span_eq_smul_top :
     Ideal.span ({↑p } : Set O) = (↑p : O) • (⊤ : Submodule O O) := by
   exact (smul_top_eq_span_singleton (p : O)).symm
@@ -498,7 +499,8 @@ noncomputable def basis_radical_of_basis_radical_mod [NoZeroSMulDivisors ℤ O]{
   · exact heq3
 
 
-lemma basis_radical_def_left [NoZeroSMulDivisors ℤ O] {n m : ℕ}[Nonempty (Fin m ⊕ Fin n)]
+omit [Nontrivial O] in
+lemma basis_radical_def_left {n m : ℕ}[Nonempty (Fin m ⊕ Fin n)]
     (b : Fin m → O ) (b' : Fin n → O ) (b1 : Basis (Fin m) (ZMod p) (Ip mod''' p))
     (b2 : Basis (Fin m ⊕ Fin n) (ZMod p) R)(b3 : Basis (Fin (m + n)) ℤ O)
     (heq1' : ∀ (i : Fin m), (b1 i).1  = ((b i) mod'' p) )
@@ -512,7 +514,8 @@ lemma basis_radical_def_left [NoZeroSMulDivisors ℤ O] {n m : ℕ}[Nonempty (Fi
   rfl
 
 
-lemma basis_radical_def_right [NoZeroSMulDivisors ℤ O] {n m : ℕ} [Nonempty (Fin m ⊕ Fin n)]
+omit [Nontrivial O] in
+lemma basis_radical_def_right {n m : ℕ} [Nonempty (Fin m ⊕ Fin n)]
     (b : Fin m → O) (b' : Fin n → O) (b1 : Basis (Fin m) (ZMod p) (Ip mod''' p))
     (b2 : Basis (Fin m ⊕ Fin n) (ZMod p) R) (b3 : Basis (Fin (m + n)) ℤ O)
     (heq1' : ∀ (i : Fin m), (b1 i).1  = (b i) mod'' p)
@@ -678,10 +681,9 @@ lemma basis_radical_of_linear_independent_ker_im_in_repr [NoZeroSMulDivisors ℤ
     simp_rw [← zsmul_eq_zmod_smul, ← Submodule.mkQ_apply]
     rw [← map_sum, ← map_sum, ← map_add]
     congr
-    simp only [zsmul_eq_mul, AddSubmonoid.coe_finset_sum,
+    simp only [zsmul_eq_mul, AddSubmonoidClass.coe_finset_sum,
       Submodule.coe_toAddSubmonoid, Submodule.coe_smul_of_tower]
-    simp only [zsmul_eq_mul, AddSubmonoid.coe_finset_sum,
-      Submodule.coe_toAddSubmonoid, Submodule.coe_smul_of_tower]
+    simp
   have aux4 : Finset.univ.sum (λ i => (↑(s i  : ZMod p) • (⟨b i, aux1 i ⟩ mod p ))) +
     Finset.univ.sum (λ j => (↑(t j  : ZMod p) • (⟨ p * b' j, aux2 j ⟩ mod p) ) ) =
       Finset.univ.sum (λ (k : (Fin m) ⊕ (Fin n)) => ( ↑(((algebraMap ℤ (ZMod p)) ∘ Sum.elim s t) k) •
@@ -703,8 +705,6 @@ lemma basis_radical_of_linear_independent_ker_im_in_repr [NoZeroSMulDivisors ℤ
   symm
   exact Basis.repr_sum_self _ _
 
-
-
 --------------------------------------------------------------------
 -- Construction of the linear map `O / pO → ((Iₚ / pIₚ) → (Iₚ / pIₚ))`
 
@@ -712,13 +712,15 @@ lemma basis_radical_of_linear_independent_ker_im_in_repr [NoZeroSMulDivisors ℤ
 def mul_α_aux (α : O) : Ip → (Ip mod' p) :=
   λ β => (⟨ (α * β.val), Ideal.mul_mem_left _ α β.2 ⟩ : Ip)  mod p
 
+omit hpI [Nontrivial O] [Module.Free ℤ O] in
 lemma mul_α_aux_def (α : O) (β : Ip) : (mul_α_aux O p α ) β  =
   ((⟨ (α * β.val), Ideal.mul_mem_left _ α β.2 ⟩ : Ip)  mod p ) := rfl
 
+omit hpI [Nontrivial O] [Module.Free ℤ O] in
 lemma mul_α_aux_map_add {α : O} {β γ : Ip} :
   (mul_α_aux O p α) (β + γ) = (mul_α_aux O p α) β + (mul_α_aux O p α) γ := by
   rw [mul_α_aux_def, mul_α_aux_def, mul_α_aux_def, ← Submodule.Quotient.mk_add]
-  simp only [ AddSubmonoid.coe_add, Submodule.coe_toAddSubmonoid, AddSubmonoid.mk_add_mk]
+  simp only [AddMemClass.coe_add]
   congr
   ring
 
@@ -726,7 +728,7 @@ lemma mul_α_aux_map_add {α : O} {β γ : Ip} :
 def map_mul_α (α : O) : (Ip mod' p) → (Ip mod' p) := by
   refine @Quotient.lift _ _ (Submodule.quotientRel ((p : ℤ ) • (⊤ : Submodule ℤ Ip ))) (mul_α_aux O p α) ?_
   intros a b hab
-  have := (@Submodule.quotientRel_r_def _ _ _ _ _ ((p : ℤ ) • (⊤ : Submodule ℤ Ip )) a b).1 hab
+  have := (@Submodule.quotientRel_def _ _ _ _ _ ((p : ℤ ) • (⊤ : Submodule ℤ Ip )) a b).1 hab
   erw [Submodule.Quotient.eq ((p : ℤ )  • (⊤ : Submodule ℤ Ip ))]
   have aux1 : α * a - α * b  ∈ Ip := by
     exact Ideal.sub_mem _  (Ideal.mul_mem_left _ _ a.2) (Ideal.mul_mem_left _ _ b.2)
@@ -748,6 +750,7 @@ def map_mul_α (α : O) : (Ip mod' p) → (Ip mod' p) := by
       · exact Ideal.mul_mem_left _ _ i.2
   convert aux2
 
+omit hpI [Nontrivial O] [Module.Free ℤ O] in
 lemma map_mul_α_aux2 (α : O) (β : Ip) :
   (map_mul_α O p α) (β mod p) = (mul_α_aux O p α ) β := rfl
 
@@ -772,6 +775,7 @@ def mul_α (α : O) : (Ip mod' p) →ₗ[(ZMod p)] (Ip mod' p) where
       ZMod.intCast_cast, Submodule.coe_toAddSubgroup]
     ring
 
+omit [Nontrivial O] [Module.Free ℤ O] in
 lemma map_mul_α_def (α : O) (β : Ip) :
   (mul_α O p α) (β mod p) = (mul_α_aux O p α ) β := rfl
 
@@ -779,9 +783,11 @@ lemma map_mul_α_def (α : O) (β : Ip) :
 def map_to_end : O → ((Ip mod' p)  →ₗ[(ZMod p)] (Ip mod' p)) :=
   λ (α : O) => mul_α O p α
 
+omit [Nontrivial O] [Module.Free ℤ O] in
 lemma map_to_end_eq (a : O) : map_to_end O p a = mul_α O p a := rfl
 
-lemma map_to_end_eq_zero (t : O) :  map_to_end O p (↑p * t) = 0 := by
+omit [Nontrivial O] [Module.Free ℤ O] in
+lemma map_to_end_eq_zero (t : O) : map_to_end O p (↑p * t) = 0 := by
   rw [map_to_end_eq ]
   apply LinearMap.ext
   rintro ⟨β, hb⟩
@@ -796,10 +802,12 @@ lemma map_to_end_eq_zero (t : O) :  map_to_end O p (↑p * t) = 0 := by
     ring
     · exact Ideal.mul_mem_left _ _ hb
 
+omit [Nontrivial O] [Module.Free ℤ O] in
 lemma map_to_end_zero :  map_to_end O p 0 = 0 := by
    rw [← mul_zero (↑p : O)]
    exact map_to_end_eq_zero O p 0
 
+omit [Nontrivial O] [Module.Free ℤ O] in
 lemma map_to_end_add (a b : O) :
     map_to_end O p (a + b) = (map_to_end O p a) + (map_to_end O p b) := by
   repeat erw [map_to_end_eq]
@@ -810,20 +818,23 @@ lemma map_to_end_add (a b : O) :
   congr
   ring
 
+omit [Nontrivial O] [Module.Free ℤ O] in
 /-- The lift of `map_to_end` to a map from `O / pO` to an endomorphism of `Iₚ / pIₚ` -/
 def map_to_end_mod : R → (((Ip mod' p)  →ₗ[(ZMod p)] (Ip mod' p))) := by
   apply @Quotient.lift _ _ (Submodule.quotientRel ((p : O) • (⊤ : Submodule O O)) ) (map_to_end O p)
   intros a b hab
-  have := (@Submodule.quotientRel_r_def _ _ _ _ _ ((p : O) • (⊤ : Submodule O O)) a b).1 hab
+  have := (@Submodule.quotientRel_def _ _ _ _ _ ((p : O) • (⊤ : Submodule O O)) a b).1 hab
   obtain ⟨t, ht⟩ := (p_smul_top' O _ _).1
-    ((Submodule.quotientRel_r_def ((p : O) • (⊤ : Submodule O O))).1 hab)
+    ((Submodule.quotientRel_def ((p : O) • (⊤ : Submodule O O))).1 hab)
   replace ht := eq_add_of_sub_eq  ht.symm
   rw [ht, map_to_end_add, map_to_end_eq_zero, zero_add ]
 
+omit [Nontrivial O] [Module.Free ℤ O] in
 lemma map_to_end_mod_def {x : O} :
     map_to_end_mod O p ((Ideal.Quotient.mk ((p : O) • (⊤ : Submodule O O))) x)
   = (map_to_end O p) x := rfl
 
+omit [Nontrivial O] [Module.Free ℤ O] in
 lemma map_add' {x y : R} :
     map_to_end_mod O p (x + y) = map_to_end_mod O p x +  map_to_end_mod O p y := by
   rcases x with ⟨a⟩
@@ -832,10 +843,15 @@ lemma map_add' {x y : R} :
   erw [ map_to_end_mod_def O p, map_to_end_mod_def O p, map_to_end_mod_def O p]
   exact map_to_end_add O p _ _
 
+-- Shortcut instances to avoid timeouts
+instance : DistribMulAction (ZMod p) (Ip mod' p) := inferInstance
+instance : SMulCommClass (ZMod p) (ZMod p) (Ip mod' p) := inferInstance
+
+omit [Nontrivial O] [Module.Free ℤ O] in
 lemma map_smul' {r : ZMod p} {x : R} :
     map_to_end_mod O p (r • x) = r • (map_to_end_mod O p x) := by
   rcases x with ⟨a⟩
-  dsimp
+  dsimp [Submodule.Quotient.quot_mk_eq_mk]
   refine LinearMap.ext ?_
   rintro ⟨b⟩
   rw [map_to_end_mod_def, LinearMap.smul_apply, map_to_end_eq]
@@ -851,8 +867,10 @@ def map_to_end_lin : R →ₗ[(ZMod p)] ((Ip mod' p) →ₗ[ZMod p] (Ip mod' p))
   map_add' := by { intro x y ; exact map_add' O p }
   map_smul' := by { intro r x  ; exact map_smul' O p }
 
+omit [Nontrivial O] [Module.Free ℤ O] in
 lemma map_to_end_lin_def (x : R) : map_to_end_lin O p x = map_to_end_mod O p x := rfl
 
+omit [Nontrivial O] [Module.Free ℤ O] in
 lemma mul_ideal_in_p_mul_of_kernel (α : O) :
     (α mod'' p) ∈ LinearMap.ker (map_to_end_lin O p) ↔
     ∀ (x : O), x ∈ Ip → (∃ (j : O), j ∈ Ip ∧ α * x = p * j ) := by
@@ -872,19 +890,20 @@ lemma mul_ideal_in_p_mul_of_kernel (α : O) :
   · intro h
     apply LinearMap.ext
     rintro ⟨x⟩
-    dsimp
-    simp_rw [map_mul_α_def ]
+    dsimp [Submodule.Quotient.quot_mk_eq_mk]
+    simp_rw [map_mul_α_def]
     rw [mul_α_aux_def, Submodule.Quotient.mk_eq_zero]
     obtain ⟨j, hj1, hj2⟩ := h x.1 x.2
     simp_rw [hj2]
     use ⟨j, ?_⟩
     constructor
-    · simp only [Submodule.top_coe, Set.mem_univ]
-    · dsimp
-      rw [←Subtype.coe_inj ]
+    . simp only [Submodule.top_coe, Set.mem_univ]
+    . dsimp
+      rw [← Subtype.coe_inj]
       simp only [natCast_zsmul, Submodule.coe_smul_of_tower, nsmul_eq_mul]
       · exact hj1
 
+omit [Nontrivial O] in
 /-- If `Iₚ = pO`, then the kernel of `map_to_end_mod` is trivial· -/
 lemma ker_map_to_end_lin_eq_bot_of_rad_eq_smul
     (hradeq : Ip = (p : O) • (⊤ : Submodule O O)) :
@@ -895,11 +914,12 @@ lemma ker_map_to_end_lin_eq_bot_of_rad_eq_smul
   rw [← ha, mul_ideal_in_p_mul_of_kernel, hradeq] at hx
   obtain ⟨j ,hj1, hj2⟩ := hx (p : O) (by use 1 ; simp only [Submodule.top_coe, Set.mem_univ,
     DistribMulAction.toLinearMap_apply, smul_eq_mul, mul_one, and_self])
-  rw [mul_comm, ← nsmul_eq_mul, ← nsmul_eq_mul, nsmul_eq_smul_cast ℤ, nsmul_eq_smul_cast ℤ, smul_right_inj] at hj2
+  rw [mul_comm, ← nsmul_eq_mul, ← nsmul_eq_mul, ← Nat.cast_smul_eq_nsmul ℤ, ← Nat.cast_smul_eq_nsmul ℤ, smul_right_inj] at hj2
   rw [← ha]
   simp only [Submodule.mem_bot, Ideal.Quotient.eq_zero_iff_mem, hj2, hj1]
   exact NeZero.natCast_ne p ℤ
 
+omit [Nontrivial O] [Module.Free ℤ O] in
 /-- A way to certify that the kernel of `map_to_end_lin` is trivial by, essentially,
   looking at the entries of the matrix representations of the image of a tuple `v`
   of elements in `O`· -/
@@ -918,6 +938,7 @@ lemma ker_map_to_end_lin_eq_bot_of_mul_ne_zero' {τ₁ τ₂: Type*} [Fintype τ
   map_to_end_eq, heq2, map_mul_α_def, mul_α_aux_def ]
   exact h
 
+omit [Nontrivial O] [Module.Free ℤ O] in
 /-- A way to certify that the kernel of `map_to_end_lin` is trivial by
   looking at the image of a tuple `v` of elements in `O`, and evaluating the
   endomorphisms at an element `w` in `Iₚ /pIₚ ` · -/
@@ -939,7 +960,7 @@ end PartIV
 
 
 variable {K : Type*} [CommRing K] [NoZeroSMulDivisors ℤ K]
-variable (O : Subalgebra ℤ K) (p : ℕ) [hpI : Fact $ Nat.Prime p] [Module.Free ℤ O]
+variable (O : Subalgebra ℤ K) (p : ℕ) [hpI : Fact $ Nat.Prime p]
 
 
 local notation "Ip" => Ideal.radical (Ideal.span {(p : O)} )
@@ -947,7 +968,6 @@ local notation I "mod'" p =>  I ⧸ ((p : ℤ ) • (⊤ : Submodule ℤ I ) )
 local notation x "mod" p => (@Submodule.Quotient.mk ℤ Ip _ _ _ ((p : ℤ ) • (⊤ : Submodule ℤ Ip ))) x
 local notation "R" =>  O ⧸ Ideal.span {(p : O)}
 local notation x "mod''" p => (Ideal.Quotient.mk (Ideal.span {(p : O)} )) x
-
 
 -- We had to exclude this instance from the search, otherwise Lean has trouble finding the
 -- Module (ZMod p) _ instance for the type (Ip mod' p) →ₗ[ZMod p] (Ip mod' p) ·
@@ -970,7 +990,7 @@ refine le_antisymm (subalgebra_le_multiplierRing Ip) ?_
     obtain ⟨j, hj1, hj2⟩ := ha x hx
     refine ⟨j, hj1, ?_⟩
     rw [← Subtype.val_inj]
-    simp only [nsmul_eq_mul, Submonoid.coe_mul, Subsemiring.coe_toSubmonoid, Subalgebra.coe_toSubsemiring,
+    simp only [nsmul_eq_mul, MulMemClass.coe_mul, Subsemiring.coe_toSubmonoid, Subalgebra.coe_toSubsemiring,
       SubringClass.coe_natCast]
     rw [← hj2]
     ring
@@ -980,7 +1000,7 @@ refine le_antisymm (subalgebra_le_multiplierRing Ip) ?_
   erw [Submodule.Quotient.mk_eq_zero, ← ideal_span_eq_smul_top, Ideal.mem_span_singleton] at this
   choose k hk using this
   rw [← Subtype.val_inj] at hk
-  simp only [Submonoid.coe_mul, Subsemiring.coe_toSubmonoid, Subalgebra.coe_toSubsemiring, SubringClass.coe_natCast] at hk
+  simp only [MulMemClass.coe_mul, Subsemiring.coe_toSubmonoid, Subalgebra.coe_toSubsemiring, SubringClass.coe_natCast] at hk
   rw [← Int.cast_natCast, ← zsmul_eq_mul,  ← zsmul_eq_mul, smul_right_inj] at hk
   rw [hk] ; refine SetLike.coe_mem _
   exact NeZero.natCast_ne p ℤ

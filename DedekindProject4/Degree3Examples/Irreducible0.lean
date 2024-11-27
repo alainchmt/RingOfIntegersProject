@@ -8,8 +8,8 @@ local notation "T" => (X^3 - 3*X - 10 : ℤ[X])
 
 local notation "l" => [-10, -3, 0, 1]
 
-lemma T_ofList' : T = ofList l := by norm_num ; ring 
-    
+lemma T_ofList' : T = ofList l := by norm_num ; ring
+
 noncomputable def C : CertificateIrreducibleIntOfPrime T l where
  hpol := T_ofList'
  hdeg := by decide
@@ -22,9 +22,9 @@ noncomputable def C : CertificateIrreducibleIntOfPrime T l where
  ρ := 41/10
  hPPrime := by norm_num
  hrpos := by norm_num
- hrhoeq := by rfl
- hrho := by rfl
+ hrhoeq := by decide!
+ hrho := by decide!
  hs := by norm_num
  heval := by norm_num
 
-theorem irreducible_T : Irreducible T := irreducible_of_CertificateIrreducibleIntOfPrime _ _ C 
+theorem irreducible_T : Irreducible T := irreducible_of_CertificateIrreducibleIntOfPrime _ _ C

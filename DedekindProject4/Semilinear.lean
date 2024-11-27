@@ -1,8 +1,7 @@
-import Mathlib.LinearAlgebra.Basis
-import Mathlib.RingTheory.Ideal.Operations
-import Mathlib.LinearAlgebra.FreeModule.Basic
+import Mathlib.LinearAlgebra.Basis.Basic
 import Mathlib.LinearAlgebra.FiniteDimensional
-
+import Mathlib.LinearAlgebra.FreeModule.Basic
+import Mathlib.RingTheory.Ideal.Operations
 /-! # Semilinear
 
 This files includes some results on semilinear maps and bases mapped through them.
@@ -26,10 +25,10 @@ theorem Submodule.coord_in_ideal_of_ideal_smul_top_mem {R M ι: Type*} [CommRing
 
 variable {ι R S M N : Type _} [CommRing R] [CommRing S] [AddCommGroup M] [AddCommGroup N]
   [Module R M] [Module S N] (g : R →+* S) (g' : ZeroHom S R) (hg : Function.RightInverse g' g)
-  [RingHomSurjective g] (f : M →ₛₗ[g] N) (f' : N → M) (hf : Function.RightInverse f' f)
+   (f : M →ₛₗ[g] N) (f' : N → M) (hf : Function.RightInverse f' f)
 
-theorem Finsupp.apply_total' (f : M →ₛₗ[g] N) (v) (l : α →₀ R) :
-    f (Finsupp.total α M R v l) = Finsupp.total α N S (f ∘ v) (l.mapRange g (map_zero g)) := by
+theorem Finsupp.apply_linearCombination' (f : M →ₛₗ[g] N) (v) (l : α →₀ R) :
+    f (Finsupp.linearCombination R v l) = Finsupp.linearCombination S (f ∘ v) (l.mapRange g (map_zero g)) := by
   apply Finsupp.induction_linear l
   case h0 => simp (config := { contextual := true })
   case hsingle => simp (config := { contextual := true })
@@ -38,16 +37,17 @@ theorem Finsupp.apply_total' (f : M →ₛₗ[g] N) (v) (l : α →₀ R) :
     rw [map_add, map_add, hx, hy, mapRange_add, map_add]
     · apply map_add
 
+include hg in
 /-- If `v` is a linearly independent family of vectors and the kernel of a semilinear map `f` is
 disjoint with the submodule spanned by the vectors of `v`, then `f ∘ v` is a linearly independent
 family of vectors· See also `LinearIndependent.mapₛₗ'` for a similar statement with a different
 condition on the kernel of `f` . -/
-theorem LinearIndependent.mapₛₗ {v : ι → M} (hv : LinearIndependent R v) {f : M →ₛₗ[g] N}
-    (hf_inj : Submodule.comap (Finsupp.total ι M R v) (LinearMap.ker f) ≤ RingHom.ker g • ⊤) :
+theorem LinearIndependent.mapₛₗ {v : ι → M} {f : M →ₛₗ[g] N}
+    (hf_inj : Submodule.comap (Finsupp.linearCombination R v) (LinearMap.ker f) ≤ RingHom.ker g • ⊤) :
     LinearIndependent S (f ∘ v) := by
-  unfold LinearIndependent at hv ⊢
+  rw [linearIndependent_iff_ker]
   haveI : Inhabited M := ⟨0⟩
-  rw [← le_bot_iff, Finsupp.total_comp]
+  rw [← le_bot_iff, Finsupp.linearCombination_comp]
   intros x hx
   let x' : ι →₀ R := x.mapRange g' (map_zero g')
   have x_eq : x = x'.mapRange g (map_zero g) := by
@@ -59,7 +59,7 @@ theorem LinearIndependent.mapₛₗ {v : ι → M} (hv : LinearIndependent R v) 
     rw [Finsupp.mapRange_apply, Finsupp.zero_apply, ← RingHom.mem_ker]
     apply h
   rw [x_eq, LinearMap.mem_ker, LinearMap.comp_apply,
-      Finsupp.lmapDomain_apply, Finsupp.total_mapDomain, ← Finsupp.apply_total' g f,
+      Finsupp.lmapDomain_apply, Finsupp.linearCombination_mapDomain, ← Finsupp.apply_linearCombination' g f,
        ← LinearMap.comp_apply, ← LinearMap.mem_ker, LinearMap.ker_comp] at hx
   refine Submodule.smul_induction_on (hf_inj hx) ?_ ?_
   · intros r hr x _ i
@@ -70,6 +70,7 @@ theorem LinearIndependent.mapₛₗ {v : ι → M} (hv : LinearIndependent R v) 
     exact add_mem (hx i) (hy i)
 
 
+variable [RingHomSurjective g] in
 theorem Submodule.finsupp_mem_smul_top (x : ι →₀ R) (I : Ideal R)
     (h : ∀ i, x i ∈ I) : x ∈ (I • ⊤ : Submodule R (ι →₀ R)) := by
   induction x using Finsupp.induction
@@ -88,28 +89,29 @@ theorem Submodule.finsupp_mem_smul_top (x : ι →₀ R) (I : Ideal R)
       specialize h j
       rwa [Finsupp.add_apply, Finsupp.single_eq_of_ne hij, zero_add] at h
 
+include hg
 /-- If `v` is a linearly independent family of vectors that can be extended to a basis,
 and `f` is a surjective `g`-semilinear map with kernel contained in `ker g • ⊤`,
 then `f ∘ v` is linearly independent· -/
-theorem LinearIndependent.mapₛₗ' {τ : Type* } {v : ι → M} (b : Basis τ R M) (φ : ι → τ )
+theorem LinearIndependent.mapₛₗ' {τ : Type* } {v : ι → M} (b : Basis τ R M) (φ : ι → τ)
      (phi_inj : φ.Injective) (hext : v = b ∘ φ ) {f : M →ₛₗ[g] N}
      (hf_inj : LinearMap.ker f ≤ RingHom.ker g • ⊤) :
     LinearIndependent S (f ∘ v) := by
   have hv : LinearIndependent R v := by
     rw [hext]
     exact LinearIndependent.comp (Basis.linearIndependent b) φ phi_inj
-  apply hv.mapₛₗ g g' hg
+  apply LinearIndependent.mapₛₗ g g' hg
   intros x hx
   apply Submodule.finsupp_mem_smul_top
   intro i
   rw [Submodule.mem_comap] at hx
   replace hx := hf_inj hx
-  rw [hext, Finsupp.total_comp, LinearMap.comp_apply ] at hx
+  rw [hext, Finsupp.linearCombination_comp, LinearMap.comp_apply ] at hx
   have := Submodule.coord_in_ideal_of_ideal_smul_top_mem b _ _ hx (φ i)
-  rw [LinearMap.map_finsupp_total] at this
-  simp only [Finsupp.lmapDomain_apply, Finsupp.total_mapDomain] at this
+  rw [LinearMap.map_finsupp_linearCombination] at this
+  simp only [Finsupp.lmapDomain_apply, Finsupp.linearCombination_mapDomain] at this
   convert this
-  rw [Function.comp.assoc, Finsupp.total_apply , Finsupp.sum_of_support_subset _ (Finset.Subset.refl x.support), Finset.sum_eq_single i]
+  rw [Function.comp_assoc, Finsupp.linearCombination_apply , Finsupp.sum_of_support_subset _ (Finset.Subset.refl x.support), Finset.sum_eq_single i]
   · simp only [Function.comp_apply, Basis.coord_apply, Basis.repr_self, Finsupp.single_eq_same, smul_eq_mul, mul_one]
   · intros j _ hjnei
     simp only [Function.Injective.ne phi_inj hjnei, Function.comp_apply, Basis.coord_apply, Basis.repr_self, Finsupp.single_eq_of_ne,
@@ -135,10 +137,12 @@ noncomputable def Basis.comp_semilinear {ι R S M N : Type*} [CommRing R] [CommR
     LinearMap.range_eq_top]
         exact hf.surjective })
 
+variable [RingHomSurjective g]
 lemma Basis.comp_semilinear_def (b : Basis ι R M)
     (h : LinearMap.ker f ≤ RingHom.ker g • ⊤) (i : ι) :
-    (Basis.comp_semilinear g g' hg f f' hf b h) i = f (b i) :=
-  by { erw [Basis.mk_apply] ; rfl }
+    (Basis.comp_semilinear g g' hg f f' hf b h) i = f (b i) := by
+  erw [Basis.mk_apply]
+  rfl
 
 lemma Basis.comp_semilinear_repr
     (b : Basis ι R M)
@@ -146,9 +150,9 @@ lemma Basis.comp_semilinear_repr
     g ∘ (b.repr x) = (Basis.comp_semilinear g g' hg f f' hf b h).repr (f x) := by
   let v : ι →₀ S := Finsupp.mapRange g (RingHom.map_zero g) (b.repr x)
   have : v = g ∘ (b.repr x) := rfl
-  rw [← this, ← Basis.repr_total (Basis.comp_semilinear g g' hg f f' hf b h) v]
-  suffices f x = Finsupp.total ι N S (comp_semilinear g g' hg f f' hf b h) v by rw [this]
-  erw [← Basis.total_repr b x, Finsupp.total_apply, Finsupp.total_apply, map_sum]
+  rw [← this, ← Basis.repr_linearCombination (Basis.comp_semilinear g g' hg f f' hf b h) v]
+  suffices f x = Finsupp.linearCombination S (comp_semilinear g g' hg f f' hf b h) v by rw [this]
+  erw [← Basis.linearCombination_repr b x, Finsupp.linearCombination_apply, Finsupp.linearCombination_apply, map_sum]
   simp only [LinearMap.map_smulₛₗ, ← Basis.comp_semilinear_def g g' hg f f' hf b h]
   rw [Basis.ext_elem_iff (Basis.comp_semilinear g g' hg f f' hf b h)]
   intro i
@@ -217,22 +221,22 @@ noncomputable def basisSubmoduleModOfBasisMod  { R S M N J: Type _} {n m : ℕ} 
     rw [Fintype.sum_sum_type] at hc
     simp only [hv, Sum.elim_inl, Sum.elim_inr, hv1, hv2] at hc
     have :=  h.map_smul'
-    simp_rw [hauxsmul, ← map_sum,  ← LinearMap.map_add ] at hc
+    simp_rw [hauxsmul, ← map_sum,  ← LinearMap.map_add] at hc
     rw [← LinearMap.mem_ker] at hc
     replace hc := hker2 hc
     rw [kergp, Submodule.ideal_span_singleton_smul] at hc
     obtain ⟨⟨t,htmem⟩ , _, ht⟩ := hc
-    simp only [DistribMulAction.toLinearMap_apply, SetLike.mk_smul_mk ] at ht
+    simp only [DistribMulAction.toLinearMap_apply, SetLike.mk_smul_mk] at ht
     rw [ ← Subtype.val_inj] at ht
-    simp only [AddSubmonoid.coe_add, Submodule.coe_toAddSubmonoid, AddSubmonoid.coe_finset_sum] at ht
+    simp only [AddMemClass.coe_add, AddSubmonoidClass.coe_finset_sum] at ht
     have ht_copy := ht
     apply_fun f at ht
     simp only [LinearMap.map_smulₛₗ, map_add, map_sum, g_eval, zero_smul, smul_zero,
      Finset.sum_const_zero, add_zero, hginv, ← heq1] at ht
     have hcl_z : ∀ x, c (Sum.inl x) = 0 := by
       apply Fintype.linearIndependent_iff.1 (Basis.linearIndependent b1) (λ x => c (Sum.inl x))
-      rw [ ← Subtype.val_inj]
-      simp only [AddSubmonoid.coe_finset_sum, Submodule.coe_toAddSubmonoid, SetLike.val_smul,
+      rw [← Subtype.val_inj]
+      simp only [AddMemClass.coe_add, AddSubmonoidClass.coe_finset_sum, SetLike.val_smul,
         ZeroMemClass.coe_zero]
       exact ht.symm
     simp_rw [hcl_z] at ht_copy
@@ -247,25 +251,27 @@ noncomputable def basisSubmoduleModOfBasisMod  { R S M N J: Type _} {n m : ℕ} 
       simp only [SetLike.mem_coe, and_true, htmem]
     have htsum := Basis.sum_repr b1 (⟨f t, hftb1⟩)
     rw [ ← Subtype.val_inj] at htsum
-    simp only [AddSubmonoid.coe_finset_sum, Submodule.coe_toAddSubmonoid, SetLike.val_smul ] at htsum
+    simp only [AddSubmonoidClass.coe_finset_sum, Submodule.coe_toAddSubmonoid, SetLike.val_smul ] at htsum
     simp_rw [heq1, ← heq2] at htsum
     rw [← htsum] at ht_copy
     have hcr_z : ∀ x , c (Sum.inr x) = 0 := by
       intro x
       apply_fun (Basis.coord b2) (Sum.inr x) at ht_copy
-      simp only [map_sub, map_sum, LinearMap.map_smulₛₗ, RingHom.id_apply, Basis.coord_apply, Basis.repr_self,
-        ne_eq, not_false_eq_true, Finsupp.single_eq_of_ne, smul_eq_mul, mul_zero,
-        Finset.sum_const_zero, Sum.inr.injEq, zero_sub, map_zero, neg_eq_zero] at ht_copy
+      simp only [map_sub, map_sum, map_smul, Basis.coord_apply, Basis.repr_self, ne_eq,
+        reduceCtorEq, not_false_eq_true, Finsupp.single_eq_of_ne, smul_eq_mul, mul_zero,
+        Finset.sum_const_zero, zero_sub, map_zero, neg_eq_zero] at ht_copy
       rw [Finset.sum_eq_single x] at ht_copy
-      simp only [Finsupp.single_eq_same, mul_one] at ht_copy
-      exact ht_copy
-      intros b _ hbnex
-      convert mul_zero (c (Sum.inr b))
-      refine Finsupp.single_eq_of_ne ?_
-      simp only [ne_eq, Sum.inr.injEq, hbnex, not_false_eq_true]
-      simp only [Finset.mem_univ, not_true, Finsupp.single_eq_same, mul_one, IsEmpty.forall_iff]
-    intro i ;
-    cases i  ; exact hcl_z _ ; exact hcr_z _
+      · simp only [Finsupp.single_eq_same, mul_one] at ht_copy
+        exact ht_copy
+      · intros b _ hbnex
+        convert mul_zero (c (Sum.inr b))
+        refine Finsupp.single_eq_of_ne ?_
+        simp only [ne_eq, Sum.inr.injEq, hbnex, not_false_eq_true]
+      · simp only [Finset.mem_univ, not_true, Finsupp.single_eq_same, mul_one, IsEmpty.forall_iff]
+    intro i
+    cases i
+    · exact hcl_z _
+    · exact hcr_z _
   refine basisOfLinearIndependentOfCardEqFinrank hi ?_
-  rw [FiniteDimensional.finrank_eq_card_basis (Basis.comp_semilinear g g' hg h h' hh b4 hker2)]
+  rw [Module.finrank_eq_card_basis (Basis.comp_semilinear g g' hg h h' hh b4 hker2)]
   simp only [Fintype.card_sum, Fintype.card_fin, add_comm]

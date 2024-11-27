@@ -6,7 +6,6 @@ import DedekindProject4.MaximalAPI
 import Mathlib.NumberTheory.NumberField.Basic
 import DedekindProject4.Degree3Examples.Irreducible0
 import DedekindProject4.DiscriminantSubalgebraBuilder
-import Mathlib.NumberTheory.NumberField.Discriminant
 
 -- Number field with label 3.1.648.1 in the LMFDB
 
@@ -40,12 +39,12 @@ noncomputable def BQ : SubalgebraBuilderLists 3 ℤ  ℚ K T l where
 ![![0, 0, 1],![5, 1, -1],![-5, 2, 2]]]
  s := ![![[], [], []],![[], [], [-2]],![[], [-2], [2, -1]]]
  h := Adj
- honed := rfl
+ honed := by decide!
  hd := by norm_num
  hcc := by decide
  hin := by decide
  hsymma := by decide
- hc_le := by decide
+ hc_le := by decide!
 
 lemma T_degree : T.natDegree = 3 := (SubalgebraBuilderOfList T l BQ).hdeg
 
@@ -76,10 +75,10 @@ def Table : Fin 3 → Fin 3 → List ℤ :=
  ![[0, 1, 0], [0, 1, 2], [5, 1, -1]],
  ![[0, 0, 1], [5, 1, -1], [-5, 2, 2]]]
 
-lemma timesTableT_eq_Table :  ∀ i j , Table i j = List.ofFn (timesTableO.table i j) := by decide
+lemma timesTableT_eq_Table :  ∀ i j , Table i j = List.ofFn (timesTableO.table i j) := by decide!
 
 lemma hroot_mem : θ ∈ O := by
-  refine root_in_subalgebra_lists T l BQ ![0, 1, 0] [] rfl
+  refine root_in_subalgebra_lists T l BQ ![0, 1, 0] [] (by decide!)
 
 instance hp2: Fact $ Nat.Prime 2 := fact_iff.2 (by norm_num)
 instance hp3: Fact $ Nat.Prime 3 := fact_iff.2 (by norm_num)
@@ -105,7 +104,7 @@ noncomputable def D : CertificateDedekindAlmostAllLists T l [2] where
  p := ![2, 3]
  exp := ![5, 4]
  pdgood := [3]
- hsub := by decide
+ hsub := by decide!
  hp := by
   intro i ; fin_cases i
   exact hp2.out
@@ -143,17 +142,17 @@ noncomputable def M2 : MaximalOrderCertificateLists 2 O Om hm where
  hmod2 := by decide
  hindv := by decide
  hindw := by decide
- hvFrobKer := by intro i ; fin_cases i <;> rfl
- hwFrobComp := by intro i ; fin_cases i <;> rfl
+ hvFrobKer := by decide!
+ hwFrobComp := by decide!
  g := ![![1, 0, 0],![0, 1, 1],![1, 0, 1]]
  a := ![![![1]],![![2]],![![4]]]
  c := ![![![0, 0]],![![-1, 2]],![![-4, 1]]]
  d := ![![![0],![0]],![![2],![2]],![![2],![-2]]]
  e := ![![![1, 0],![0, 1]],![![-1, 1],![4, 2]],![![0, 0],![6, 2]]]
  ab_ind := ![(Sum.inl 0, Sum.inl 0),(Sum.inl 0, Sum.inr 0),(Sum.inl 0, Sum.inr 1)]
- hindab := by decide
- hmul1 := by decide
- hmul2 := by decide
+ hindab := by decide!
+ hmul1 := by decide!
+ hmul2 := by decide!
 
 
  instance : Fact $ (Irreducible (map (algebraMap ℤ ℚ) T)) where
@@ -177,7 +176,7 @@ lemma T_discr : T.discriminant = 2592 :=  by
   unfold Polynomial.discriminant
   have : [-10, -3, 0, 1].derivative = [-3, 0, 3, 0] := rfl
   rw [← ofList_derivative_eq_derivative , this]
-  rfl
+  decide!
 
 theorem K_discr : NumberField.discr K = -648 := by
   rw [discr_numberField_eq_discrSubalgebraBuilder

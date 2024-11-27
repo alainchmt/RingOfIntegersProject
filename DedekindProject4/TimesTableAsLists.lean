@@ -29,14 +29,14 @@ variable {n : ℕ} {R : Type*} [Semiring R]
 lemma list_sum_length (hn : n ≠ 0) (f : Fin n → List R) (h : ∀ i, (f i).length = m) :
     (List.sum (List.ofFn (fun i => f i))).length = m := by
   induction' n with n hn1
-  · contradiction
-  · unfold List.sum
-    rw [List.ofFn_succ',List.concat_eq_append, List.foldl_concat, List.add_length, h]
+  . contradiction
+  . unfold List.sum
+    rw [List.ofFn_succ, List.foldr_cons, List.add_length, h]
     by_cases h1 : n = 0
-    · simp only [h1, List.ofFn_zero, List.foldl_nil, max_eq_right_iff]
+    . simp only [h1, List.ofFn_zero, List.foldr_nil, max_eq_right_iff, h]
       erw [List.length_nil]
-      simp only [zero_le]
-    · erw [hn1 h1 (fun i => f (Fin.castSucc i)) ?_ , max_self]
+      simp
+    . erw [hn1 h1 (fun i => f (Fin.succ i)) ?_ , max_self]
       simp only [h, implies_true]
 
 variable (T : Fin n → Fin n → Fin n → R)
@@ -98,10 +98,10 @@ lemma List.table_mul_list_ofFn (hn : n ≠ 0) (a b : Fin n → R) :
   congr
   ext j
   congr
-  rw [List.getD_eq_get _ _ (lt_of_lt_of_eq i.2 (List.length_ofFn _).symm )]
-  simp only [get_ofFn, Fin.cast_mk, Fin.eta]
-  rw [List.getD_eq_get _ _ (lt_of_lt_of_eq j.2 (List.length_ofFn _).symm )]
-  simp only [get_ofFn, Fin.cast_mk, Fin.eta]
+  rw [List.getD_eq_getElem _ _ (lt_of_lt_of_eq i.2 (List.length_ofFn _).symm )]
+  simp only [List.getElem_ofFn, Fin.cast_mk, Fin.eta]
+  rw [List.getD_eq_getElem _ _ (lt_of_lt_of_eq j.2 (List.length_ofFn _).symm )]
+  simp only [List.getElem_ofFn, Fin.cast_mk, Fin.eta]
 
 lemma FnOfList_table_mul_list_eq_sum_sum (a b c : Fin n → R)
     (hc : List.ofFn c = table_mul_list' T (List.ofFn a) (List.ofFn b)) :
@@ -120,7 +120,7 @@ lemma table_add_list_eq_add {S : Type*} [AddCommMonoid S] [Module R S] [Mul S]
     (B.equivFun.symm a ) + (B.equivFun.symm b) = B.equivFun.symm c := by
   simp only [LinearEquiv.toFun_eq_coe, Basis.equivFun_symm_eq_repr_symm' B]
   apply_fun B.repr
-  simp only [Basis.repr_symm_apply, map_add, Basis.repr_total]
+  simp only [Basis.repr_symm_apply, map_add, Basis.repr_linearCombination]
   ext k
   simp only [Finsupp.coe_add, Pi.add_apply, Finsupp.equivFunOnFinite_symm_apply_toFun,
   FnOfList_add_ofFn _ _ _ hc]
@@ -132,7 +132,7 @@ lemma table_mulPointwise_eq_smul
     d • (B.equivFun.symm a ) = (B.equivFun.symm c ) := by
   simp only [LinearEquiv.toFun_eq_coe, Basis.equivFun_symm_eq_repr_symm' B]
   apply_fun B.repr
-  simp only [Basis.repr_symm_apply, LinearMapClass.map_smul, Basis.repr_total]
+  simp only [Basis.repr_symm_apply, LinearMapClass.map_smul, Basis.repr_linearCombination]
   ext k
   simp only [Finsupp.coe_add,Finsupp.coe_smul, Pi.smul_apply,
    Finsupp.equivFunOnFinite_symm_apply_toFun]
@@ -152,7 +152,7 @@ lemma table_mul_list_eq_mul
   simp only [AddHom.toFun_eq_coe, LinearMap.coe_toAddHom, LinearEquiv.coe_coe,
     Basis.equivFun_symm_apply, map_sum, LinearMapClass.map_smul]
   rw [Finset.sum_mul_sum _ _ _ _]
-  simp_rw [smul_mul_smul]
+  simp_rw [smul_mul_smul_comm]
   have : ∀ i j , B i * B j = ∑ k , T i j k • B k := by
     intro i j
     rw [← Basis.sum_repr B (B i * B j)]
