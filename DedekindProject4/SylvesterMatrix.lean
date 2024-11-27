@@ -251,11 +251,15 @@ namespace Polynomial
 /--
 We define the sylvester matrix for polynomials P and Q and natural numbers n and m as the
 Sylvester matrix for the lists [P.coeff 0, P.coeff 1, ... , P.coeff n] and
-[Q.coeff 0, Q.coeff 1, ... , Q.coeff m]
+[Q.coeff 0, Q.coeff 1, ... , Q.coeff m].
+
+Note that this is slightly different from the standard definition: the highest coefficients
+end up with the highest indices. This allows for easier working with the `sylvesterMap`,
+since the `i`th coefficient ends up at index `i + j` for some `j`.
 -/
 def sylvesterMatrixAux (m n : ℕ) (P Q : R[X]) :
     Matrix (Fin (m + n)) (Fin (m + n)) R :=
-  sylvesterMatrixVec (Q.toVec (n + 1)) (P.toVec (m + 1)) -- (Fin.pad P.toVec 0) (Fin.pad Q.toVec 0)
+  sylvesterMatrixVec (Q.toVec (n + 1)) (P.toVec (m + 1))
 
 /--
 We define the sylvester matrix for polynomials P and Q of degree n and m respectively as the
