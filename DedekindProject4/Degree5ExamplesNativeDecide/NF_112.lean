@@ -78,10 +78,10 @@ def Table : Fin 5 → Fin 5 → List ℤ :=
  ![[0, 0, 0, 1, 0], [98, -82, 57, 68, 222], [-440, -150, 20, 25, 0], [490, -498, 255, 360, 1110], [-2, 150, -57, -86, -238]], 
  ![[0, 0, 0, 0, 1], [-32, 24, -17, -22, -68], [20, 140, -74, -85, -260], [-2, 150, -57, -86, -238], [-20, -67, 27, 36, 101]]]
 
-lemma timesTableT_eq_Table :  ∀ i j , Table i j = List.ofFn (timesTableO.table i j) := by native_decide
+lemma timesTableT_eq_Table :  ∀ i j , Table i j = List.ofFn (timesTableO.table i j) := by decide!
 
 lemma hroot_mem : θ ∈ O := by
-  refine root_in_subalgebra_lists T l BQ ![0, 1, 0, 0, 0] [] (by native_decide)
+  refine root_in_subalgebra_lists T l BQ ![0, 1, 0, 0, 0] [] (by decide!)
 
 instance hp37: Fact $ Nat.Prime 37 := fact_iff.2 (by norm_num)
 instance hp2: Fact $ Nat.Prime 2 := fact_iff.2 (by norm_num)
