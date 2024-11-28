@@ -4,18 +4,18 @@ import DedekindProject4.CertifyAdjoinRoot
 import Mathlib.Tactic.NormNum.Prime
 import DedekindProject4.MaximalAPI
 import Mathlib.NumberTheory.NumberField.Basic
-import DedekindProject4.Degree3Examples.Irreducible6
+import DedekindProject4.Degree3Examples.Irreducible4
 import DedekindProject4.DiscriminantSubalgebraBuilder
 
--- Number field with label 3.1.16200.2 in the LMFDB
+-- Number field with label 3.1.9720.2 in the LMFDB
 
 open Polynomial
 
-noncomputable def T : ℤ[X] := X^3 - 30*X - 80
-lemma T_def : T = X^3 - 30*X - 80 := rfl
+noncomputable def T : ℤ[X] := X^3 - 18*X - 48
+lemma T_def : T = X^3 - 18*X - 48 := rfl
 
 local notation "K" => AdjoinRoot (map (algebraMap ℤ ℚ) T)
-local notation "l" => [-80, -30, 0, 1]
+local notation "l" => [-48, -18, 0, 1]
 
 noncomputable def Adj : IsAdjoinRoot K (map (algebraMap ℤ ℚ) T) :=
    AdjoinRoot.isAdjoinRoot _
@@ -35,16 +35,16 @@ noncomputable def BQ : SubalgebraBuilderLists 3 ℤ  ℚ K T l where
  hm := rfl
  B := ![![2, 0, 0], ![0, 2, 0], ![0, 0, 1]]
  a := ![ ![![1, 0, 0],![0, 1, 0],![0, 0, 1]],
-![![0, 1, 0],![0, 0, 2],![40, 15, 0]],
-![![0, 0, 1],![40, 15, 0],![0, 20, 15]]]
+![![0, 1, 0],![0, 0, 2],![24, 9, 0]],
+![![0, 0, 1],![24, 9, 0],![0, 12, 9]]]
  s := ![![[], [], []],![[], [], [-2]],![[], [-2], [0, -1]]]
  h := Adj
- honed := by decide!
+ honed := by native_decide
  hd := by norm_num
- hcc := by decide
- hin := by decide
- hsymma := by decide
- hc_le := by decide!
+ hcc := by native_decide
+ hin := by native_decide
+ hsymma := by native_decide
+ hc_le := by native_decide
 
 lemma T_degree : T.natDegree = 3 := (SubalgebraBuilderOfList T l BQ).hdeg
 
@@ -72,8 +72,8 @@ noncomputable def timesTableO : TimesTable (Fin 3) ℤ O :=
   timesTableOfSubalgebraBuilderLists T l BQ
 def Table : Fin 3 → Fin 3 → List ℤ :=
  ![ ![[1, 0, 0], [0, 1, 0], [0, 0, 1]],
- ![[0, 1, 0], [0, 0, 2], [40, 15, 0]],
- ![[0, 0, 1], [40, 15, 0], [0, 20, 15]]]
+ ![[0, 1, 0], [0, 0, 2], [24, 9, 0]],
+ ![[0, 0, 1], [24, 9, 0], [0, 12, 9]]]
 
 lemma timesTableT_eq_Table :  ∀ i j , Table i j = List.ofFn (timesTableO.table i j) := by decide!
 
@@ -89,11 +89,11 @@ def CD3: CertificateDedekindCriterionLists l 3 where
  a' := []
  b' :=  [1]
  k := [1]
- f := [27, 11, 1]
- g :=  [1, 1]
- h :=  [1, 2, 1]
- a :=  [2]
- b :=  [1, 1]
+ f := [16, 6]
+ g :=  [0, 1]
+ h :=  [0, 0, 1]
+ a :=  [1]
+ b :=  []
  c :=  []
  hdvdpow := rfl
  hcop := rfl
@@ -101,15 +101,15 @@ def CD3: CertificateDedekindCriterionLists l 3 where
  habc := by rfl
 
 def CD5: CertificateDedekindCriterionLists l 5 where
- n :=  3
- a' := []
- b' :=  [1]
- k := [1]
- f := [16, 6]
- g :=  [0, 1]
- h :=  [0, 0, 1]
- a :=  [1]
- b :=  [4]
+ n :=  2
+ a' := [4]
+ b' :=  [4, 3]
+ k := [2, 1]
+ f := [12, 5, 1]
+ g :=  [3, 1, 1]
+ h :=  [4, 1]
+ a :=  [0, 2]
+ b :=  [2, 3]
  c :=  []
  hdvdpow := rfl
  hcop := rfl
@@ -119,17 +119,17 @@ def CD5: CertificateDedekindCriterionLists l 5 where
 noncomputable def D : CertificateDedekindAlmostAllLists T l [2] where
  n := 3
  p := ![2, 3, 5]
- exp := ![5, 4, 2]
+ exp := ![5, 5, 1]
  pdgood := [3, 5]
- hsub := by decide!
+ hsub := by native_decide
  hp := by
   intro i ; fin_cases i
   exact hp2.out
   exact hp3.out
   exact hp5.out
- a := [-2160, 540]
- b := [3600, 720, -180]
- hab := by decide
+ a := [-1296, 324]
+ b := [1296, 432, -108]
+ hab := by native_decide
  hd := by
   intro p hp
   fin_cases hp
@@ -140,7 +140,7 @@ noncomputable def M2 : MaximalOrderCertificateLists 2 O Om hm where
  m := 1
  n := 2
  t :=  2
- hpos := by decide
+ hpos := by native_decide
  TT := timesTableO
  B' := B'
  T := Table
@@ -148,8 +148,8 @@ noncomputable def M2 : MaximalOrderCertificateLists 2 O Om hm where
  TMod := ![![[1, 0, 0], [0, 1, 0], [0, 0, 1]],
 ![[0, 1, 0], [0, 0, 0], [0, 1, 0]],
 ![[0, 0, 1], [0, 1, 0], [0, 0, 1]]]
- hTMod := by decide
- hle := by decide
+ hTMod := by native_decide
+ hle := by native_decide
  b1 := ![![0, 1, 0]]
  b2 := ![![1, 0, 0],![0, 0, 1]]
  v := ![![0, 1, 0]]
@@ -157,21 +157,21 @@ noncomputable def M2 : MaximalOrderCertificateLists 2 O Om hm where
  wFrob := ![![1, 0, 0],![0, 0, 1]]
  v_ind := ![1]
  w_ind := ![0, 2]
- hmod1 := by decide
- hmod2 := by decide
- hindv := by decide
- hindw := by decide
- hvFrobKer := by intro i ; fin_cases i ; decide!
- hwFrobComp := by intro i ; fin_cases i <;> decide!
+ hmod1 := by native_decide
+ hmod2 := by native_decide
+ hindv := by native_decide
+ hindw := by native_decide
+ hvFrobKer := by native_decide
+ hwFrobComp := by native_decide
  g := ![![0, 0, 1],![1, 0, 1],![0, 1, 0]]
- a := ![![![15]],![![16]],![![0]]]
- c := ![![![20, 0]],![![20, 0]],![![0, 1]]]
- d := ![![![0],![40]],![![0],![40]],![![2],![30]]]
- e := ![![![0, 1],![0, 15]],![![1, 1],![0, 16]],![![0, 0],![40, 0]]]
+ a := ![![![9]],![![10]],![![0]]]
+ c := ![![![12, 0]],![![12, 0]],![![0, 1]]]
+ d := ![![![0],![24]],![![0],![24]],![![2],![18]]]
+ e := ![![![0, 1],![0, 9]],![![1, 1],![0, 10]],![![0, 0],![24, 0]]]
  ab_ind := ![(Sum.inl 0, Sum.inl 0),(Sum.inr 0, Sum.inr 0),(Sum.inl 0, Sum.inr 1)]
- hindab := by decide
- hmul1 := by decide!
- hmul2 := by decide!
+ hindab := by native_decide
+ hmul1 := by native_decide
+ hmul2 := by native_decide
 
 
  instance : Fact $ (Irreducible (map (algebraMap ℤ ℚ) T)) where
@@ -188,16 +188,16 @@ theorem O_ringOfIntegers : O = integralClosure ℤ K := by
      (satisfiesDedekindAlmostAllLists_of_certificate T l T_ofList [2] D p hp hc)
     rw [T_degree, rank_subalgebra_eq_card_basis Om B']
 
+
 theorem  O_ringOfIntegers' : O = NumberField.RingOfIntegers K := by rw [O_ringOfIntegers] ; rfl
 
-
-lemma T_discr : T.discriminant = -64800 :=  by
+lemma T_discr : T.discriminant = -38880 :=  by
   rw [T_monic.discriminant_def, T_degree, ← T_ofList]
-  have : [-80, -30, 0, 1].derivative = [-30, 0, 3, 0] := rfl
+  have : [-48, -18, 0, 1].derivative = [-18, 0, 3, 0] := rfl
   rw [← ofList_derivative_eq_derivative , this]
-  decide!
+  native_decide
 
-theorem K_discr : NumberField.discr K = -16200 := by
+theorem K_discr : NumberField.discr K = -9720 := by
   rw [discr_numberField_eq_discrSubalgebraBuilder
   T_irreducible BQ O_ringOfIntegers]
   rw [T_discr]

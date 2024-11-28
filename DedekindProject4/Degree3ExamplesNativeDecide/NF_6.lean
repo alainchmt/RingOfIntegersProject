@@ -39,12 +39,12 @@ noncomputable def BQ : SubalgebraBuilderLists 3 ℤ  ℚ K T l where
 ![![0, 0, 1],![40, 15, 0],![0, 20, 15]]]
  s := ![![[], [], []],![[], [], [-2]],![[], [-2], [0, -1]]]
  h := Adj
- honed := by decide!
+ honed := by native_decide
  hd := by norm_num
- hcc := by decide
- hin := by decide
- hsymma := by decide
- hc_le := by decide!
+ hcc := by native_decide
+ hin := by native_decide
+ hsymma := by native_decide
+ hc_le := by native_decide
 
 lemma T_degree : T.natDegree = 3 := (SubalgebraBuilderOfList T l BQ).hdeg
 
@@ -121,7 +121,7 @@ noncomputable def D : CertificateDedekindAlmostAllLists T l [2] where
  p := ![2, 3, 5]
  exp := ![5, 4, 2]
  pdgood := [3, 5]
- hsub := by decide!
+ hsub := by native_decide
  hp := by
   intro i ; fin_cases i
   exact hp2.out
@@ -129,7 +129,7 @@ noncomputable def D : CertificateDedekindAlmostAllLists T l [2] where
   exact hp5.out
  a := [-2160, 540]
  b := [3600, 720, -180]
- hab := by decide
+ hab := by native_decide
  hd := by
   intro p hp
   fin_cases hp
@@ -140,7 +140,7 @@ noncomputable def M2 : MaximalOrderCertificateLists 2 O Om hm where
  m := 1
  n := 2
  t :=  2
- hpos := by decide
+ hpos := by native_decide
  TT := timesTableO
  B' := B'
  T := Table
@@ -148,8 +148,8 @@ noncomputable def M2 : MaximalOrderCertificateLists 2 O Om hm where
  TMod := ![![[1, 0, 0], [0, 1, 0], [0, 0, 1]],
 ![[0, 1, 0], [0, 0, 0], [0, 1, 0]],
 ![[0, 0, 1], [0, 1, 0], [0, 0, 1]]]
- hTMod := by decide
- hle := by decide
+ hTMod := by native_decide
+ hle := by native_decide
  b1 := ![![0, 1, 0]]
  b2 := ![![1, 0, 0],![0, 0, 1]]
  v := ![![0, 1, 0]]
@@ -157,10 +157,10 @@ noncomputable def M2 : MaximalOrderCertificateLists 2 O Om hm where
  wFrob := ![![1, 0, 0],![0, 0, 1]]
  v_ind := ![1]
  w_ind := ![0, 2]
- hmod1 := by decide
- hmod2 := by decide
- hindv := by decide
- hindw := by decide
+ hmod1 := by native_decide
+ hmod2 := by native_decide
+ hindv := by native_decide
+ hindw := by native_decide
  hvFrobKer := by intro i ; fin_cases i ; decide!
  hwFrobComp := by intro i ; fin_cases i <;> decide!
  g := ![![0, 0, 1],![1, 0, 1],![0, 1, 0]]
@@ -169,9 +169,9 @@ noncomputable def M2 : MaximalOrderCertificateLists 2 O Om hm where
  d := ![![![0],![40]],![![0],![40]],![![2],![30]]]
  e := ![![![0, 1],![0, 15]],![![1, 1],![0, 16]],![![0, 0],![40, 0]]]
  ab_ind := ![(Sum.inl 0, Sum.inl 0),(Sum.inr 0, Sum.inr 0),(Sum.inl 0, Sum.inr 1)]
- hindab := by decide
- hmul1 := by decide!
- hmul2 := by decide!
+ hindab := by native_decide
+ hmul1 := by native_decide
+ hmul2 := by native_decide
 
 
  instance : Fact $ (Irreducible (map (algebraMap ℤ ℚ) T)) where
@@ -190,13 +190,14 @@ theorem O_ringOfIntegers : O = integralClosure ℤ K := by
 
 theorem  O_ringOfIntegers' : O = NumberField.RingOfIntegers K := by rw [O_ringOfIntegers] ; rfl
 
-
+set_option maxRecDepth 2000 in
 lemma T_discr : T.discriminant = -64800 :=  by
   rw [T_monic.discriminant_def, T_degree, ← T_ofList]
   have : [-80, -30, 0, 1].derivative = [-30, 0, 3, 0] := rfl
   rw [← ofList_derivative_eq_derivative , this]
-  decide!
+  native_decide
 
+set_option maxRecDepth 2000 in
 theorem K_discr : NumberField.discr K = -16200 := by
   rw [discr_numberField_eq_discrSubalgebraBuilder
   T_irreducible BQ O_ringOfIntegers]

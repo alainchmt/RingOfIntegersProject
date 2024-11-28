@@ -7,7 +7,6 @@ import Mathlib.NumberTheory.NumberField.Basic
 import DedekindProject4.Degree8Example.Irreducible0
 
 
-
 open Polynomial
 
 noncomputable def T : ℤ[X] := X^8 - X^6 + 2*X^4 + X^2 + 1
@@ -25,7 +24,7 @@ lemma T_ofList : ofList l = T := by
   rw [T_def] ; norm_num ; ring
 
 -- We build the subalgebra with integral basis [1, a, a^2, a^3, a^4, a^5, 1/2*a^6 - 1/2, 1/2*a^7 - 1/2*a]
-set_option maxHeartbeats 400000
+
 noncomputable def BQ : SubalgebraBuilderLists 8 ℤ  ℚ K T l where
  d :=  2
  hlen := rfl
@@ -43,12 +42,12 @@ noncomputable def BQ : SubalgebraBuilderLists 8 ℤ  ℚ K T l where
 ![![0, 0, 0, 0, 0, 0, 0, 1],![0, 0, -1, 0, -1, 0, 1, 0],![0, 0, 0, -1, 0, -1, 0, 1],![-1, 0, -1, 0, -2, 0, -1, 0],![0, -1, 0, -1, 0, -2, 0, -1],![-2, 0, 0, 0, 0, 0, -5, 0],![0, -1, 0, 0, 0, 0, 0, -3],![0, 0, 2, 0, 3, 0, -3, 0]]]
  s := ![![[], [], [], [], [], [], [], []],![[], [], [], [], [], [], [], [-2]],![[], [], [], [], [], [], [-2], [0, -2]],![[], [], [], [], [], [-4], [0, -2], [-2, 0, -2]],![[], [], [], [], [-4], [0, -4], [-2, 0, -2], [0, -2, 0, -2]],![[], [], [], [-4], [0, -4], [-4, 0, -4], [0, -2, 0, -2], [2, 0, -2, 0, -2]],![[], [], [-2], [0, -2], [-2, 0, -2], [0, -2, 0, -2], [1, 0, -1, 0, -1], [0, 1, 0, -1, 0, -1]],![[], [-2], [0, -2], [-2, 0, -2], [0, -2, 0, -2], [2, 0, -2, 0, -2], [0, 1, 0, -1, 0, -1], [6, 0, 1, 0, -1, 0, -1]]]
  h := Adj
- honed := rfl
+ honed := by decide!
  hd := by norm_num
  hcc := by decide
  hin := by decide
  hsymma := by decide
- hc_le := by decide
+ hc_le := by decide!
 
 lemma T_degree : T.natDegree = 8 := (SubalgebraBuilderOfList T l BQ).hdeg
 
@@ -64,7 +63,6 @@ noncomputable def O := subalgebraOfBuilderLists T l BQ
 
 def hm : O ≤ Om := le_integralClosure_of_basis O (basisOfBuilderLists T l BQ)
 
-set_option synthInstance.maxHeartbeats 50000
 noncomputable def B : Basis (Fin 8) ℤ O := basisOfBuilderLists T l BQ
 noncomputable def B' : Basis (Fin 8) ℤ Om :=
   Basis.reindex (AdjoinRoot.basisIntegralClosure T_monic
@@ -85,10 +83,10 @@ def Table : Fin 8 → Fin 8 → List ℤ :=
  ![[0, 0, 0, 0, 0, 0, 1, 0], [0, 0, 0, 0, 0, 0, 0, 1], [0, 0, -1, 0, -1, 0, 1, 0], [0, 0, 0, -1, 0, -1, 0, 1], [-1, 0, -1, 0, -2, 0, -1, 0], [0, -1, 0, -1, 0, -2, 0, -1], [-1, 0, 0, 0, 0, 0, -3, 0], [0, -1, 0, 0, 0, 0, 0, -3]],
  ![[0, 0, 0, 0, 0, 0, 0, 1], [0, 0, -1, 0, -1, 0, 1, 0], [0, 0, 0, -1, 0, -1, 0, 1], [-1, 0, -1, 0, -2, 0, -1, 0], [0, -1, 0, -1, 0, -2, 0, -1], [-2, 0, 0, 0, 0, 0, -5, 0], [0, -1, 0, 0, 0, 0, 0, -3], [0, 0, 2, 0, 3, 0, -3, 0]]]
 
-lemma timesTableT_eq_Table :  ∀ i j , Table i j = List.ofFn (timesTableO.table i j) := by decide
+lemma timesTableT_eq_Table :  ∀ i j , Table i j = List.ofFn (timesTableO.table i j) := by decide!
 
 lemma hroot_mem : θ ∈ O := by
-  refine root_in_subalgebra_lists T l BQ ![0, 1, 0, 0, 0, 0, 0, 0] [] rfl
+  refine root_in_subalgebra_lists T l BQ ![0, 1, 0, 0, 0, 0, 0, 0] [] (by decide!)
 
 instance hp2: Fact $ Nat.Prime 2 := fact_iff.2 (by norm_num)
 instance hp3: Fact $ Nat.Prime 3 := fact_iff.2 (by norm_num)
@@ -131,7 +129,7 @@ noncomputable def D : CertificateDedekindAlmostAllLists T l [2] where
  p := ![2, 3, 5]
  exp := ![12, 4, 4]
  pdgood := [3, 5]
- hsub := by decide
+ hsub := by decide!
  hp := by
   intro i ; fin_cases i
   exact hp2.out
@@ -176,14 +174,14 @@ noncomputable def M2 : MaximalOrderCertificateWLists 2 O Om hm where
  hmod2 := by decide
  hindv := by decide
  hindw := by decide
- hvFrobKer := by intro i ; fin_cases i <;> rfl
- hwFrobComp := by intro i ; fin_cases i <;> rfl
- g := ![![1, 0, 0, 0, 1, 1, 1, 1],![1, 0, 1, 1, 1, 0, 1, 0],![0, 1, 0, 1, 1, 1, 0, 1],![1, 1, 1, 0, 0, 0, 1, 0],![0, 1, 0, 0, 1, 0, 0, 0],![0, 0, 1, 0, 0, 1, 0, 0],![1, 0, 0, 1, 0, 0, 0, 0],![1, 1, 1, 0, 1, 0, 1, 1]]
- w1 := ![0, 3, 0, 3]
- w2 := ![1, 2, 1, 0]
- a := ![![29, -34, -38, -20],![34, -21, -40, -6],![36, -34, -41, -16],![10, -6, -16, 3],![16, -10, -14, -4],![18, -16, -26, -2],![10, -2, -10, 2],![22, -20, -30, -8]]
- c := ![![-10, 14, 8, -14],![-14, 14, 12, -4],![-16, 16, 10, -8],![-4, 6, 8, 0],![-9, 6, 6, 2],![-6, 9, 8, -4],![-4, 6, 3, 0],![-8, 10, 10, -7]]
- hmulw := by decide
+ hvFrobKer := by decide!
+ hwFrobComp := by decide!
+ g := ![![0, 1, 0, 0, 0, 0, 1, 0],![0, 1, 0, 0, 1, 1, 1, 1],![1, 0, 0, 0, 1, 1, 1, 1],![1, 1, 0, 1, 0, 1, 1, 0],![0, 1, 0, 1, 1, 1, 1, 1],![1, 0, 0, 0, 0, 1, 1, 1],![1, 1, 1, 0, 1, 0, 1, 1],![0, 1, 1, 1, 1, 0, 1, 1]]
+ w1 := ![0, 3, 2, 2]
+ w2 := ![1, 0, 3, 3]
+ a := ![![1, -14, -10, 2],![42, -45, -60, -26],![42, -42, -53, -32],![40, -36, -50, -7],![56, -54, -74, -26],![26, -28, -34, -26],![26, -26, -40, -12],![40, -38, -56, -14]]
+ c := ![![-2, 8, 0, -2],![-16, 18, 14, -18],![-16, 14, 14, -16],![-12, 22, 16, -12],![-21, 24, 18, -20],![-6, 7, 10, -18],![-14, 12, 13, -2],![-20, 18, 14, -7]]
+ hmulw := by decide!
  ac_indw := ![Sum.inl 0, Sum.inl 1, Sum.inl 2, Sum.inl 3, Sum.inr 0, Sum.inr 1, Sum.inr 2, Sum.inr 3]
  hacindw := by decide
 

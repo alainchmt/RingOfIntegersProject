@@ -7,15 +7,15 @@ local notation "T" => (X^6 - 15*X^4 - 140*X^3 - 270*X^2 + 96*X + 3220 : ℤ[X])
 
 local notation "l" => [3220, 96, -270, -140, -15, 0, 1]
 
-lemma T_ofList' : T = ofList l := by norm_num ; ring 
-    
-instance hp7 : Fact $ Nat.Prime 7 := fact_iff.2 (by norm_num)
-instance hp19 : Fact $ Nat.Prime 19 := fact_iff.2 (by norm_num)
+lemma T_ofList' : T = ofList l := by norm_num ; ring
+
+instance hp7' : Fact $ Nat.Prime 7 := fact_iff.2 (by norm_num)
+instance hp19' : Fact $ Nat.Prime 19 := fact_iff.2 (by norm_num)
 
 def P7P2 : CertificateIrreducibleZModOfList' 7 4 2 2 [1, 6, 3, 2, 1] where
  m := 1
  P := ![2]
- exp := ![2] 
+ exp := ![2]
  hneq := by decide
  hP := by decide
  hlen := by decide
@@ -37,7 +37,7 @@ def P7P2 : CertificateIrreducibleZModOfList' 7 4 2 2 [1, 6, 3, 2, 1] where
 def P19P0 : CertificateIrreducibleZModOfList' 19 3 2 4 [8, 16, 6, 1] where
  m := 1
  P := ![3]
- exp := ![1] 
+ exp := ![1]
  hneq := by decide
  hP := by decide
  hlen := by decide
@@ -59,7 +59,7 @@ def P19P0 : CertificateIrreducibleZModOfList' 19 3 2 4 [8, 16, 6, 1] where
 def P19P1 : CertificateIrreducibleZModOfList' 19 3 2 4 [13, 5, 13, 1] where
  m := 1
  P := ![3]
- exp := ![1] 
+ exp := ![1]
  hneq := by decide
  hP := by decide
  hlen := by decide
@@ -87,19 +87,19 @@ noncomputable def C : IrreducibleCertificateIntPolynomial T l where
  hnn := by decide
  hdn := by decide
  p := ![7, 19]
- hp := by 
+ hp := by
   intro i
   fin_cases i
-  exact hp7.out
-  exact hp19.out
+  exact hp7'.out
+  exact hp19'.out
  hlc := by decide
  m := ![3, 2]
  F := fun i =>
-  match i with 
+  match i with
   | 0 => ![[0, 1], [5, 1], [1, 6, 3, 2, 1]]
   | 1 => ![[8, 16, 6, 1], [13, 5, 13, 1]]
  D := fun i =>
-  match i with 
+  match i with
   | 0 => ![1, 1, 4]
   | 1 => ![3, 3]
  hl := by decide
@@ -112,7 +112,7 @@ noncomputable def C : IrreducibleCertificateIntPolynomial T l where
   · dsimp ; exact irreducible_ofList_ofCertificateIrreducibleZModOfList' P19P0
   · dsimp ; exact irreducible_ofList_ofCertificateIrreducibleZModOfList' P19P1
  hm := by decide
- hprod := by decide
- hinter := by decide
+ hprod := by decide!
+ hinter := by decide!
 
-theorem irreducible_T : Irreducible T := irreducible_of_CertificateIntPolynomial _ _ C 
+theorem irreducible_T : Irreducible T := irreducible_of_CertificateIntPolynomial _ _ C
