@@ -4,7 +4,7 @@ import DedekindProject4.CertifyAdjoinRoot
 import Mathlib.Tactic.NormNum.Prime
 import DedekindProject4.MaximalAPI
 import Mathlib.NumberTheory.NumberField.Basic
-import DedekindProject4.Degree5Examples.Irreducible67
+import DedekindProject4.Degree5ExamplesNativeDecide.Irreducible67
 
 -- Number field with label 5.1.607500000.5 in the LMFDB
 

@@ -191,9 +191,8 @@ theorem O_ringOfIntegers : O = integralClosure ℤ K := by
 
 theorem  O_ringOfIntegers' : O = NumberField.RingOfIntegers K := by rw [O_ringOfIntegers] ; rfl
 
-lemma T_discr : T.discriminant = 10800 :=  by
-  rw [← T_ofList]
-  unfold Polynomial.discriminant
+lemma T_discr : T.discriminant = -10800 :=  by
+  rw [T_monic.discriminant_def, T_degree, ← T_ofList]
   have : [-20, 0, 0, 1].derivative = [0, 0, 3, 0] := rfl
   rw [← ofList_derivative_eq_derivative , this]
   decide!
@@ -201,5 +200,5 @@ lemma T_discr : T.discriminant = 10800 :=  by
 theorem K_discr : NumberField.discr K = -2700 := by
   rw [discr_numberField_eq_discrSubalgebraBuilder
   T_irreducible BQ O_ringOfIntegers]
-  rw [T_degree, T_discr ]
+  rw [T_discr]
   rfl

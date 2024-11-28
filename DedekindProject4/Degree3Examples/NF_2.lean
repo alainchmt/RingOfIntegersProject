@@ -39,12 +39,12 @@ noncomputable def BQ : SubalgebraBuilderLists 3 ℤ  ℚ K T l where
 ![![0, 0, 1],![15, 0, 0],![0, 5, 0]]]
  s := ![![[], [], []],![[], [], [-3]],![[], [-3], [0, -1]]]
  h := Adj
- honed := rfl
+ honed := by decide!
  hd := by norm_num
  hcc := by decide
  hin := by decide
  hsymma := by decide
- hc_le := by decide
+ hc_le := by decide!
 
 lemma T_degree : T.natDegree = 3 := (SubalgebraBuilderOfList T l BQ).hdeg
 
@@ -75,10 +75,10 @@ def Table : Fin 3 → Fin 3 → List ℤ :=
  ![[0, 1, 0], [0, 0, 3], [15, 0, 0]],
  ![[0, 0, 1], [15, 0, 0], [0, 5, 0]]]
 
-lemma timesTableT_eq_Table :  ∀ i j , Table i j = List.ofFn (timesTableO.table i j) := by decide
+lemma timesTableT_eq_Table :  ∀ i j , Table i j = List.ofFn (timesTableO.table i j) := by decide!
 
 lemma hroot_mem : θ ∈ O := by
-  refine root_in_subalgebra_lists T l BQ ![0, 1, 0] [] rfl
+  refine root_in_subalgebra_lists T l BQ ![0, 1, 0] [] (by decide!)
 
 instance hp3: Fact $ Nat.Prime 3 := fact_iff.2 (by norm_num)
 instance hp5: Fact $ Nat.Prime 5 := fact_iff.2 (by norm_num)
@@ -104,7 +104,7 @@ noncomputable def D : CertificateDedekindAlmostAllLists T l [3] where
  p := ![3, 5]
  exp := ![7, 2]
  pdgood := [5]
- hsub := by decide
+ hsub := by decide!
  hp := by
   intro i ; fin_cases i
   exact hp3.out
@@ -142,8 +142,8 @@ noncomputable def M3 : MaximalOrderCertificateLists 3 O Om hm where
  hmod2 := by decide
  hindv := by decide
  hindw := by decide
- hvFrobKer := by intro i ; fin_cases i <;> rfl
- hwFrobComp := by intro i ; fin_cases i <;> rfl
+ hvFrobKer := by decide!
+ hwFrobComp := by decide!
  g := ![![1, 0, 0],![0, 0, 2],![0, 2, 0]]
  a := ![![![1, 0],![0, 1]],![![0, 0],![10, 0]],![![0, 6],![0, 0]]]
  c := ![![![0],![0]],![![10],![0]],![![0],![10]]]
@@ -151,8 +151,8 @@ noncomputable def M3 : MaximalOrderCertificateLists 3 O Om hm where
  e := ![![![1]],![![0]],![![0]]]
  ab_ind := ![(Sum.inl 0, Sum.inl 0),(Sum.inl 1, Sum.inl 0),(Sum.inl 1, Sum.inr 0)]
  hindab := by decide
- hmul1 := by decide
- hmul2 := by decide
+ hmul1 := by decide!
+ hmul2 := by decide!
 
 
  instance : Fact $ (Irreducible (map (algebraMap ℤ ℚ) T)) where
@@ -172,15 +172,14 @@ theorem O_ringOfIntegers : O = integralClosure ℤ K := by
 
 theorem  O_ringOfIntegers' : O = NumberField.RingOfIntegers K := by rw [O_ringOfIntegers] ; rfl
 
-lemma T_discr : T.discriminant = 54675 :=  by
-  rw [← T_ofList]
-  unfold Polynomial.discriminant
+lemma T_discr : T.discriminant = -54675 :=  by
+  rw [T_monic.discriminant_def, T_degree, ← T_ofList]
   have : [-45, 0, 0, 1].derivative = [0, 0, 3, 0] := rfl
   rw [← ofList_derivative_eq_derivative , this]
-  rfl
+  decide!
 
 theorem K_discr : NumberField.discr K = -6075 := by
   rw [discr_numberField_eq_discrSubalgebraBuilder
   T_irreducible BQ O_ringOfIntegers]
-  rw [T_degree, T_discr ]
+  rw [T_discr]
   rfl
