@@ -22,8 +22,8 @@ noncomputable def C : CertificateIrreducibleIntOfPrime T l where
  ρ := 601/76
  hPPrime := by norm_num
  hrpos := by norm_num
- hrhoeq := by rfl
- hrho := by rfl
+ hrhoeq := by decide!
+ hrho := by decide!
  hs := by norm_num
  heval := by norm_num
 

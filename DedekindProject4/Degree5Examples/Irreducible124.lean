@@ -9,7 +9,7 @@ local notation "l" => [480, 0, -250, -75, 0, 1]
 
 lemma T_ofList' : T = ofList l := by norm_num ; ring 
     
-instance hp11 : Fact $ Nat.Prime 11 := fact_iff.2 (by norm_num)
+instance hp11' : Fact $ Nat.Prime 11 := fact_iff.2 (by norm_num)
 
 def P11P0 : CertificateIrreducibleZModOfList' 11 5 2 3 [7, 0, 3, 2, 0, 1] where
  m := 1
@@ -45,7 +45,7 @@ noncomputable def C : IrreducibleCertificateIntPolynomial T l where
  hp := by 
   intro i
   fin_cases i
-  exact hp11.out
+  exact hp11'.out
  hlc := by decide
  m := ![1]
  F := fun i =>
@@ -60,7 +60,7 @@ noncomputable def C : IrreducibleCertificateIntPolynomial T l where
   fin_cases i <;> fin_cases j
   · dsimp ; exact irreducible_ofList_ofCertificateIrreducibleZModOfList' P11P0
  hm := by decide
- hprod := by decide
- hinter := by decide
+ hprod := by decide!
+ hinter := by decide!
 
 theorem irreducible_T : Irreducible T := irreducible_of_CertificateIntPolynomial _ _ C 

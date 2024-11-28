@@ -40,12 +40,12 @@ noncomputable def BQ : SubalgebraBuilderLists 5 ℤ  ℚ K T l where
 ![![0, 0, 0, 0, 1],![3, 0, 3, 0, -9],![-27, 3, -27, 9, 81],![27, 12, 1, 0, 3],![-12, 0, -9, 3, 27]]]
  s := ![![[], [], [], [], []],![[], [], [], [], [-246]],![[], [], [], [-20172], [2214, -246]],![[], [], [-20172], [0, -6724], [-6642, 738, -82]],![[], [-246], [2214, -246], [-6642, 738, -82], [1470, -243, 18, -1]]]
  h := Adj
- honed := rfl
+ honed := by decide!
  hd := by norm_num
  hcc := by decide 
  hin := by decide
  hsymma := by decide
- hc_le := by decide 
+ hc_le := by decide! 
 
 lemma T_degree : T.natDegree = 5 := (SubalgebraBuilderOfList T l BQ).hdeg
 
@@ -78,10 +78,10 @@ def Table : Fin 5 → Fin 5 → List ℤ :=
  ![[0, 0, 0, 1, 0], [-18, 7, -27, 9, 82], [84, 45, 10, 0, 0], [0, 28, 15, 10, 0], [27, 12, 1, 0, 3]], 
  ![[0, 0, 0, 0, 1], [3, 0, 3, 0, -9], [-27, 3, -27, 9, 81], [27, 12, 1, 0, 3], [-12, 0, -9, 3, 27]]]
 
-lemma timesTableT_eq_Table :  ∀ i j , Table i j = List.ofFn (timesTableO.table i j) := by decide
+lemma timesTableT_eq_Table :  ∀ i j , Table i j = List.ofFn (timesTableO.table i j) := by decide!
 
 lemma hroot_mem : θ ∈ O := by
-  refine root_in_subalgebra_lists T l BQ ![0, 1, 0, 0, 0] [] rfl
+  refine root_in_subalgebra_lists T l BQ ![0, 1, 0, 0, 0] [] (by decide!)
 
 instance hp41: Fact $ Nat.Prime 41 := fact_iff.2 (by norm_num)
 instance hp2: Fact $ Nat.Prime 2 := fact_iff.2 (by norm_num)
@@ -109,7 +109,7 @@ noncomputable def D : CertificateDedekindAlmostAllLists T l [41, 2, 3] where
  p := ![2, 3, 5, 41]
  exp := ![4, 8, 7, 2]
  pdgood := [5]
- hsub := by decide
+ hsub := by decide!
  hp := by
   intro i ; fin_cases i 
   exact hp2.out
@@ -143,7 +143,7 @@ noncomputable def M41 : MaximalOrderCertificateOfUnramifiedLists 41 O Om hm wher
  wFrob := ![![1, 0, 0, 0, 0],![0, 1, 0, 0, 0],![0, 0, 1, 0, 0],![0, 0, 0, 1, 0],![0, 0, 0, 0, 1]]
  w_ind := ![0, 1, 2, 3, 4]
  hindw := by decide
- hwFrobComp := by intro i ; fin_cases i <;> rfl 
+ hwFrobComp := by decide! 
 noncomputable def M2 : MaximalOrderCertificateWLists 2 O Om hm where
  m := 2
  n := 3
@@ -171,14 +171,14 @@ noncomputable def M2 : MaximalOrderCertificateWLists 2 O Om hm where
  hmod2 := by decide
  hindv := by decide
  hindw := by decide
- hvFrobKer := by intro i ; fin_cases i <;> rfl 
- hwFrobComp := by intro i ; fin_cases i <;> rfl 
- g := ![![0, 1, 1, 0, 0],![1, 0, 1, 1, 1],![0, 0, 1, 1, 1],![0, 1, 1, 0, 1],![1, 0, 1, 0, 0]]
- w1 := ![0, 1]
- w2 := ![1, 0, 0]
- a := ![![135, -96],![118, -69],![118, -70],![170, -122],![96, -68]]
- c := ![![6, 194, -30],![58, 148, 18],![57, 148, 18],![6, 247, -40],![16, 138, -15]]
- hmulw := by decide 
+ hvFrobKer := by decide!
+ hwFrobComp := by decide! 
+ g := ![![0, 0, 1, 1, 0],![1, 1, 0, 1, 1],![0, 0, 1, 1, 1],![0, 1, 1, 0, 1],![1, 0, 1, 0, 0]]
+ w1 := ![1, 1]
+ w2 := ![0, 1, 0]
+ a := ![![177, -100],![138, -71],![232, -140],![286, -202],![164, -114]]
+ c := ![![90, 212, 36],![48, 166, 18],![93, 292, 22],![18, 407, -64],![30, 228, -23]]
+ hmulw := by decide! 
  ac_indw := ![Sum.inl 0, Sum.inl 1, Sum.inr 0, Sum.inr 1, Sum.inr 2]
  hacindw := by decide 
 
@@ -209,14 +209,14 @@ noncomputable def M3 : MaximalOrderCertificateWLists 3 O Om hm where
  hmod2 := by decide
  hindv := by decide
  hindw := by decide
- hvFrobKer := by intro i ; fin_cases i <;> rfl 
- hwFrobComp := by intro i ; fin_cases i <;> rfl 
- g := ![![2, 0, 2, 0, 4],![0, 1, 0, 0, 0],![2, 0, 2, 1, 1],![0, 0, 0, 0, 1],![0, 0, 2, 0, 0]]
- w1 := ![1, 0, 0]
- w2 := ![1, 1]
- a := ![![830, 162, 48],![45, -161, 492],![789, 198, 94],![72, 9, 12],![540, 126, 0]]
- c := ![![558, 3],![-36, 9],![387, 15],![55, 0],![336, 1]]
- hmulw := by decide 
+ hvFrobKer := by decide!
+ hwFrobComp := by decide! 
+ g := ![![1, 2, 1, 0, 2],![0, 2, 4, 0, 0],![2, 0, 2, 1, 0],![0, 0, 0, 0, 2],![0, 0, 2, 0, 0]]
+ w1 := ![1, 1, 0]
+ w2 := ![1, 0]
+ a := ![![34, -123, 396],![90, -310, 984],![96, -171, 574],![6, -48, 150],![42, -156, 492]]
+ c := ![![-33, 9],![-72, 21],![-12, 12],![-16, 3],![-36, 10]]
+ hmulw := by decide! 
  ac_indw := ![Sum.inl 0, Sum.inl 1, Sum.inl 2, Sum.inr 0, Sum.inr 1]
  hacindw := by decide 
 

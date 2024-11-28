@@ -40,12 +40,12 @@ noncomputable def BQ : SubalgebraBuilderLists 5 ℤ  ℚ K T l where
 ![![0, 0, 0, 0, 1],![4, -2, -1, -8, -4],![28, 51, -34, 6, -80],![-2, -3, 6, -10, 28],![-1, -18, 7, -11, 6]]]
  s := ![![[], [], [], [], []],![[], [], [], [], [-312]],![[], [], [], [-3744], [1248, -312]],![[], [], [-3744], [1152, -144], [780, 96, -12]],![[], [-312], [1248, -312], [780, 96, -12], [-1274, 169, 8, -1]]]
  h := Adj
- honed := rfl
+ honed := by decide!
  hd := by norm_num
  hcc := by decide 
  hin := by decide
  hsymma := by decide
- hc_le := by decide 
+ hc_le := by decide! 
 
 lemma T_degree : T.natDegree = 5 := (SubalgebraBuilderOfList T l BQ).hdeg
 
@@ -78,10 +78,10 @@ def Table : Fin 5 → Fin 5 → List ℤ :=
  ![[0, 0, 0, 1, 0], [-4, -5, 4, 0, 12], [0, -24, -1, 8, -48], [-8, 6, 2, 13, 18], [-2, -3, 6, -10, 28]], 
  ![[0, 0, 0, 0, 1], [4, -2, -1, -8, -4], [28, 51, -34, 6, -80], [-2, -3, 6, -10, 28], [-1, -18, 7, -11, 6]]]
 
-lemma timesTableT_eq_Table :  ∀ i j , Table i j = List.ofFn (timesTableO.table i j) := by decide
+lemma timesTableT_eq_Table :  ∀ i j , Table i j = List.ofFn (timesTableO.table i j) := by decide!
 
 lemma hroot_mem : θ ∈ O := by
-  refine root_in_subalgebra_lists T l BQ ![0, 1, 0, 0, 0] [] rfl
+  refine root_in_subalgebra_lists T l BQ ![0, 1, 0, 0, 0] [] (by decide!)
 
 instance hp13: Fact $ Nat.Prime 13 := fact_iff.2 (by norm_num)
 instance hp2: Fact $ Nat.Prime 2 := fact_iff.2 (by norm_num)
@@ -109,7 +109,7 @@ noncomputable def D : CertificateDedekindAlmostAllLists T l [2, 3, 13] where
  p := ![2, 3, 5, 13]
  exp := ![13, 7, 9, 4]
  pdgood := [5]
- hsub := by decide
+ hsub := by decide!
  hp := by
   intro i ; fin_cases i 
   exact hp2.out
@@ -151,14 +151,14 @@ noncomputable def M2 : MaximalOrderCertificateWLists 2 O Om hm where
  hmod2 := by decide
  hindv := by decide
  hindw := by decide
- hvFrobKer := by intro i ; fin_cases i <;> rfl 
- hwFrobComp := by intro i ; fin_cases i <;> rfl 
- g := ![![0, 1, 1, 0, 1],![0, 0, 0, 1, 0],![1, 0, 0, 0, 1],![0, 1, 1, 0, 0],![0, 1, 0, 1, 0]]
+ hvFrobKer := by decide!
+ hwFrobComp := by decide! 
+ g := ![![0, 0, 0, 0, 1],![0, 1, 1, 1, 0],![1, 0, 0, 0, 1],![0, 1, 1, 0, 0],![0, 1, 0, 1, 0]]
  w1 := ![1, 0]
- w2 := ![1, 1, 0]
- a := ![![141, -58],![22, -7],![-50, 28],![192, -86],![30, -6]]
- c := ![![-134, -14, 8],![-20, -12, -4],![43, 0, 10],![-176, -13, -2],![-30, -14, 1]]
- hmulw := by decide 
+ w2 := ![1, 0, 0]
+ a := ![![-43, 22],![190, -87],![-42, 22],![192, -96],![6, 8]]
+ c := ![![34, 4, 14],![-168, -24, -20],![35, 4, 14],![-164, -9, -28],![-14, -16, 13]]
+ hmulw := by decide! 
  ac_indw := ![Sum.inl 0, Sum.inl 1, Sum.inr 0, Sum.inr 1, Sum.inr 2]
  hacindw := by decide 
 
@@ -189,14 +189,14 @@ noncomputable def M3 : MaximalOrderCertificateWLists 3 O Om hm where
  hmod2 := by decide
  hindv := by decide
  hindw := by decide
- hvFrobKer := by intro i ; fin_cases i <;> rfl 
- hwFrobComp := by intro i ; fin_cases i <;> rfl 
- g := ![![2, 1, 0, 1, 1],![0, 0, 2, 4, 2],![2, 0, 0, 0, 2],![2, 4, 0, 4, 2],![0, 0, 4, 4, 2]]
+ hvFrobKer := by decide!
+ hwFrobComp := by decide! 
+ g := ![![1, 1, 2, 0, 1],![2, 1, 1, 0, 0],![0, 2, 1, 0, 2],![0, 1, 1, 2, 2],![2, 2, 0, 2, 2]]
  w1 := ![1, 0]
- w2 := ![1, 1, 0]
- a := ![![-119, 72],![15, 26],![-135, 60],![-345, 228],![297, -144]]
- c := ![![-45, -27, 54],![-45, 12, 9],![5, -42, 45],![-189, -70, 171],![117, 84, -139]]
- hmulw := by decide 
+ w2 := ![1, 0, 0]
+ a := ![![-17, 24],![0, 10],![-54, 42],![-24, 42],![-36, 48]]
+ c := ![![39, -36, 0],![24, -18, -3],![-14, -24, 24],![-48, -14, 27],![-84, 0, 40]]
+ hmulw := by decide! 
  ac_indw := ![Sum.inl 0, Sum.inl 1, Sum.inr 0, Sum.inr 1, Sum.inr 2]
  hacindw := by decide 
 
@@ -219,7 +219,7 @@ noncomputable def M13 : MaximalOrderCertificateOfUnramifiedLists 13 O Om hm wher
  wFrob := ![![1, 0, 0, 0, 0],![0, 1, 0, 0, 0],![0, 0, 1, 0, 0],![0, 0, 0, 1, 0],![0, 0, 0, 0, 1]]
  w_ind := ![0, 1, 2, 3, 4]
  hindw := by decide
- hwFrobComp := by intro i ; fin_cases i <;> rfl 
+ hwFrobComp := by decide! 
 
  instance : Fact $ (Irreducible (map (algebraMap ℤ ℚ) T)) where
   out :=  (Polynomial.Monic.irreducible_iff_irreducible_map_fraction_map (T_monic)).1 T_irreducible 

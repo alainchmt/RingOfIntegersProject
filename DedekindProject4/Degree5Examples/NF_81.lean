@@ -40,12 +40,12 @@ noncomputable def BQ : SubalgebraBuilderLists 5 ℤ  ℚ K T l where
 ![![0, 0, 0, 0, 1],![6, 15, -4, -18, 0],![0, 6, 21, 30, -18],![-18, -48, 8, 45, 14],![30, 54, -80, -174, 69]]]
  s := ![![[], [], [], [], []],![[], [], [], [], [-6]],![[], [], [], [-6], [0, -6]],![[], [], [-6], [6, -1], [18, 3, -1]],![[], [-6], [0, -6], [18, 3, -1], [-30, 21, 0, -1]]]
  h := Adj
- honed := rfl
+ honed := by decide!
  hd := by norm_num
  hcc := by decide 
  hin := by decide
  hsymma := by decide
- hc_le := by decide 
+ hc_le := by decide! 
 
 lemma T_degree : T.natDegree = 5 := (SubalgebraBuilderOfList T l BQ).hdeg
 
@@ -78,10 +78,10 @@ def Table : Fin 5 → Fin 5 → List ℤ :=
  ![[0, 0, 0, 1, 0], [0, 0, -1, -3, 1], [6, 15, -4, -15, -3], [-6, -14, 7, 20, -1], [-18, -48, 8, 45, 14]], 
  ![[0, 0, 0, 0, 1], [6, 15, -4, -18, 0], [0, 6, 21, 30, -18], [-18, -48, 8, 45, 14], [30, 54, -80, -174, 69]]]
 
-lemma timesTableT_eq_Table :  ∀ i j , Table i j = List.ofFn (timesTableO.table i j) := by decide
+lemma timesTableT_eq_Table :  ∀ i j , Table i j = List.ofFn (timesTableO.table i j) := by decide!
 
 lemma hroot_mem : θ ∈ O := by
-  refine root_in_subalgebra_lists T l BQ ![0, 1, 0, 0, 0] [] rfl
+  refine root_in_subalgebra_lists T l BQ ![0, 1, 0, 0, 0] [] (by decide!)
 
 instance hp2: Fact $ Nat.Prime 2 := fact_iff.2 (by norm_num)
 instance hp3: Fact $ Nat.Prime 3 := fact_iff.2 (by norm_num)
@@ -108,7 +108,7 @@ noncomputable def D : CertificateDedekindAlmostAllLists T l [2, 3] where
  p := ![2, 3, 5]
  exp := ![9, 8, 8]
  pdgood := [5]
- hsub := by decide
+ hsub := by decide!
  hp := by
   intro i ; fin_cases i 
   exact hp2.out
@@ -149,14 +149,14 @@ noncomputable def M2 : MaximalOrderCertificateWLists 2 O Om hm where
  hmod2 := by decide
  hindv := by decide
  hindw := by decide
- hvFrobKer := by intro i ; fin_cases i <;> rfl 
- hwFrobComp := by intro i ; fin_cases i <;> rfl 
- g := ![![1, 0, 1, 0, 1],![0, 1, 0, 1, 0],![1, 0, 1, 1, 0],![0, 1, 0, 1, 1],![0, 0, 1, 1, 1]]
+ hvFrobKer := by decide!
+ hwFrobComp := by decide! 
+ g := ![![1, 1, 1, 1, 0],![0, 1, 1, 0, 1],![1, 0, 1, 1, 0],![0, 1, 0, 1, 1],![0, 0, 1, 1, 1]]
  w1 := ![0, 1]
- w2 := ![1, 1, 1]
- a := ![![99, -24],![-6, 21],![-56, 48],![140, -30],![90, -4]]
- c := ![![10, 38, -72],![-12, -48, 22],![-5, -32, 50],![-12, -45, -66],![-6, -30, -39]]
- hmulw := by decide 
+ w2 := ![1, 1, 0]
+ a := ![![-39, 38],![84, -31],![-40, 38],![130, -50],![86, -22]]
+ c := ![![-2, -14, 30],![18, 86, -88],![-5, -30, 38],![6, 33, -92],![6, 28, -63]]
+ hmulw := by decide! 
  ac_indw := ![Sum.inl 0, Sum.inl 1, Sum.inr 0, Sum.inr 1, Sum.inr 2]
  hacindw := by decide 
 
@@ -187,14 +187,14 @@ noncomputable def M3 : MaximalOrderCertificateWLists 3 O Om hm where
  hmod2 := by decide
  hindv := by decide
  hindw := by decide
- hvFrobKer := by intro i ; fin_cases i <;> rfl 
- hwFrobComp := by intro i ; fin_cases i <;> rfl 
- g := ![![1, 0, 0, 0, 1],![0, 1, 2, 0, 0],![0, 2, 0, 2, 4],![0, 2, 0, 0, 2],![0, 0, 1, 0, 0]]
+ hvFrobKer := by decide!
+ hwFrobComp := by decide! 
+ g := ![![1, 0, 1, 0, 1],![0, 1, 2, 0, 0],![0, 2, 4, 2, 4],![0, 2, 0, 0, 2],![0, 0, 1, 0, 0]]
  w1 := ![1, 1, 0]
- w2 := ![1, 1]
- a := ![![-266, 66, 69],![183, -32, -18],![-1200, 330, 272],![-528, 126, 150],![90, -15, -12]]
- c := ![![-33, 48],![24, -30],![-156, 219],![-68, 90],![12, -14]]
- hmulw := by decide 
+ w2 := ![1, 0]
+ a := ![![22, 27, -9],![3, 22, 12],![120, 102, -40],![48, 42, -30],![0, 9, 6]]
+ c := ![![3, 3],![0, 3],![12, 9],![4, 6],![0, 1]]
+ hmulw := by decide! 
  ac_indw := ![Sum.inl 0, Sum.inl 1, Sum.inl 2, Sum.inr 0, Sum.inr 1]
  hacindw := by decide 
 

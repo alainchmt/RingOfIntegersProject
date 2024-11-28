@@ -40,12 +40,12 @@ noncomputable def BQ : SubalgebraBuilderLists 5 ℤ  ℚ K T l where
 ![![0, 0, 0, 0, 1],![18, 7, -11, -4, -43],![102, 106, -92, -22, -287],![-183, 97, 64, 11, 318],![-3, -33, 14, 3, 29]]]
  s := ![![[], [], [], [], []],![[], [], [], [], [-1068]],![[], [], [], [-570312], [45924, -1068]],![[], [], [-570312], [0, -285156], [153792, 22962, -534]],![[], [-1068], [45924, -1068], [153792, 22962, -534], [-25518, -1275, 86, -1]]]
  h := Adj
- honed := rfl
+ honed := by decide!
  hd := by norm_num
  hcc := by decide 
  hin := by decide
  hsymma := by decide
- hc_le := by decide 
+ hc_le := by decide! 
 
 lemma T_degree : T.natDegree = 5 := (SubalgebraBuilderOfList T l BQ).hdeg
 
@@ -78,10 +78,10 @@ def Table : Fin 5 → Fin 5 → List ℤ :=
  ![[0, 0, 0, 1, 0], [-219, -100, 143, 43, 534], [195, -638, 175, -1, 0], [219, 285, -462, 132, -534], [-183, 97, 64, 11, 318]], 
  ![[0, 0, 0, 0, 1], [18, 7, -11, -4, -43], [102, 106, -92, -22, -287], [-183, 97, 64, 11, 318], [-3, -33, 14, 3, 29]]]
 
-lemma timesTableT_eq_Table :  ∀ i j , Table i j = List.ofFn (timesTableO.table i j) := by decide
+lemma timesTableT_eq_Table :  ∀ i j , Table i j = List.ofFn (timesTableO.table i j) := by decide!
 
 lemma hroot_mem : θ ∈ O := by
-  refine root_in_subalgebra_lists T l BQ ![0, 1, 0, 0, 0] [] rfl
+  refine root_in_subalgebra_lists T l BQ ![0, 1, 0, 0, 0] [] (by decide!)
 
 instance hp89: Fact $ Nat.Prime 89 := fact_iff.2 (by norm_num)
 instance hp2: Fact $ Nat.Prime 2 := fact_iff.2 (by norm_num)
@@ -109,7 +109,7 @@ noncomputable def D : CertificateDedekindAlmostAllLists T l [89, 2, 3] where
  p := ![2, 3, 5, 89]
  exp := ![8, 8, 9, 2]
  pdgood := [5]
- hsub := by decide
+ hsub := by decide!
  hp := by
   intro i ; fin_cases i 
   exact hp2.out
@@ -143,7 +143,7 @@ noncomputable def M89 : MaximalOrderCertificateOfUnramifiedLists 89 O Om hm wher
  wFrob := ![![1, 0, 0, 0, 0],![0, 1, 0, 0, 0],![0, 0, 1, 0, 0],![0, 0, 0, 1, 0],![0, 0, 0, 0, 1]]
  w_ind := ![0, 1, 2, 3, 4]
  hindw := by decide
- hwFrobComp := by intro i ; fin_cases i <;> rfl 
+ hwFrobComp := by decide! 
 noncomputable def M2 : MaximalOrderCertificateWLists 2 O Om hm where
  m := 2
  n := 3
@@ -171,14 +171,14 @@ noncomputable def M2 : MaximalOrderCertificateWLists 2 O Om hm where
  hmod2 := by decide
  hindv := by decide
  hindw := by decide
- hvFrobKer := by intro i ; fin_cases i <;> rfl 
- hwFrobComp := by intro i ; fin_cases i <;> rfl 
- g := ![![1, 0, 0, 1, 0],![0, 0, 0, 1, 0],![0, 1, 0, 1, 1],![1, 1, 1, 1, 1],![1, 1, 0, 0, 0]]
- w1 := ![1, 1]
- w2 := ![0, 0, 0]
- a := ![![175, -142],![174, -143],![184, -140],![358, 438],![48, 98]]
- c := ![![108, -474, 0],![108, -474, 0],![-105, -484, 118],![-1600, -2359, 1186],![-400, -364, 267]]
- hmulw := by decide 
+ hvFrobKer := by decide!
+ hwFrobComp := by decide! 
+ g := ![![0, 0, 1, 0, 0],![0, 1, 1, 1, 0],![0, 1, 0, 1, 1],![1, 1, 1, 1, 1],![1, 1, 0, 0, 0]]
+ w1 := ![1, 0]
+ w2 := ![1, 1, 0]
+ a := ![![89, 376],![354, 255],![246, -152],![336, 224],![46, 100]]
+ c := ![![-700, -1140, 534],![-1488, -1938, 1068],![-775, -648, 508],![-1474, -1787, 1042],![-398, -364, 267]]
+ hmulw := by decide! 
  ac_indw := ![Sum.inl 0, Sum.inl 1, Sum.inr 0, Sum.inr 1, Sum.inr 2]
  hacindw := by decide 
 
@@ -209,14 +209,14 @@ noncomputable def M3 : MaximalOrderCertificateWLists 3 O Om hm where
  hmod2 := by decide
  hindv := by decide
  hindw := by decide
- hvFrobKer := by intro i ; fin_cases i <;> rfl 
- hwFrobComp := by intro i ; fin_cases i <;> rfl 
- g := ![![2, 0, 1, 1, 1],![0, 1, 0, 2, 0],![2, 1, 0, 1, 2],![0, 2, 2, 0, 0],![0, 2, 2, 1, 0]]
- w1 := ![1, 0, 1]
- w2 := ![0, 1]
- a := ![![1228, 291, 300],![3363, 484, 669],![2007, 378, 352],![-468, 438, 48],![1104, 612, 363]]
- c := ![![-219, -558],![-627, -1164],![-423, -642],![64, -258],![-216, -788]]
- hmulw := by decide 
+ hvFrobKer := by decide!
+ hwFrobComp := by decide! 
+ g := ![![1, 0, 1, 0, 0],![0, 0, 2, 0, 2],![1, 2, 0, 0, 1],![0, 1, 1, 0, 0],![0, 1, 1, 2, 0]]
+ w1 := ![0, 1, 1]
+ w2 := ![1, 0]
+ a := ![![-68, 282, 42],![48, 562, 72],![504, 243, 70],![138, 402, 78],![978, 84, 390]]
+ c := ![![-12, -186],![-84, -342],![-150, -177],![-74, -282],![-42, -668]]
+ hmulw := by decide! 
  ac_indw := ![Sum.inl 0, Sum.inl 1, Sum.inl 2, Sum.inr 0, Sum.inr 1]
  hacindw := by decide 
 

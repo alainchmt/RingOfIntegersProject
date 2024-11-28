@@ -40,12 +40,12 @@ noncomputable def BQ : SubalgebraBuilderLists 5 ℤ  ℚ K T l where
 ![![0, 0, 0, 0, 1],![6, 3, 0, -8, -2],![-6, -8, 11, 0, -14],![-45, -20, -8, 71, 15],![39, 38, -36, -30, 50]]]
  s := ![![[], [], [], [], []],![[], [], [], [], [-16]],![[], [], [], [-32], [16, -8]],![[], [], [-32], [0, -16], [120, 8, -4]],![[], [-16], [16, -8], [120, 8, -4], [-104, 22, 4, -1]]]
  h := Adj
- honed := rfl
+ honed := by decide!
  hd := by norm_num
  hcc := by decide 
  hin := by decide
  hsymma := by decide
- hc_le := by decide 
+ hc_le := by decide! 
 
 lemma T_degree : T.natDegree = 5 := (SubalgebraBuilderOfList T l BQ).hdeg
 
@@ -78,10 +78,10 @@ def Table : Fin 5 → Fin 5 → List ℤ :=
  ![[0, 0, 0, 1, 0], [0, 2, -2, 2, 4], [12, 7, 0, -16, 0], [0, -11, 24, -17, -34], [-45, -20, -8, 71, 15]], 
  ![[0, 0, 0, 0, 1], [6, 3, 0, -8, -2], [-6, -8, 11, 0, -14], [-45, -20, -8, 71, 15], [39, 38, -36, -30, 50]]]
 
-lemma timesTableT_eq_Table :  ∀ i j , Table i j = List.ofFn (timesTableO.table i j) := by decide
+lemma timesTableT_eq_Table :  ∀ i j , Table i j = List.ofFn (timesTableO.table i j) := by decide!
 
 lemma hroot_mem : θ ∈ O := by
-  refine root_in_subalgebra_lists T l BQ ![0, 1, 0, 0, 0] [] rfl
+  refine root_in_subalgebra_lists T l BQ ![0, 1, 0, 0, 0] [] (by decide!)
 
 instance hp2: Fact $ Nat.Prime 2 := fact_iff.2 (by norm_num)
 instance hp3: Fact $ Nat.Prime 3 := fact_iff.2 (by norm_num)
@@ -124,7 +124,7 @@ noncomputable def D : CertificateDedekindAlmostAllLists T l [2] where
  p := ![2, 3, 5]
  exp := ![20, 4, 7]
  pdgood := [3, 5]
- hsub := by decide
+ hsub := by decide!
  hp := by
   intro i ; fin_cases i 
   exact hp2.out
@@ -166,14 +166,14 @@ noncomputable def M2 : MaximalOrderCertificateWLists 2 O Om hm where
  hmod2 := by decide
  hindv := by decide
  hindw := by decide
- hvFrobKer := by intro i ; fin_cases i <;> rfl 
- hwFrobComp := by intro i ; fin_cases i <;> rfl 
+ hvFrobKer := by decide!
+ hwFrobComp := by decide! 
  g := ![![0, 1, 0, 1, 0],![1, 0, 1, 0, 1],![0, 0, 1, 1, 1],![1, 0, 0, 0, 1],![0, 1, 0, 0, 0]]
  w1 := ![1, 1]
  w2 := ![1, 0, 1]
  a := ![![17, 4],![18, 23],![36, 18],![24, 26],![-2, 8]]
  c := ![![-16, 20, -4],![6, -16, 0],![-15, 6, -6],![6, -19, -6],![4, -2, 1]]
- hmulw := by decide 
+ hmulw := by decide! 
  ac_indw := ![Sum.inl 0, Sum.inl 1, Sum.inr 0, Sum.inr 1, Sum.inr 2]
  hacindw := by decide 
 

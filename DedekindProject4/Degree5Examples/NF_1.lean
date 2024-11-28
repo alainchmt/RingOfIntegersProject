@@ -40,12 +40,12 @@ noncomputable def BQ : SubalgebraBuilderLists 5 ℤ  ℚ K T l where
 ![![0, 0, 0, 0, 1],![1, -2, 0, 0, -3],![-3, 7, -2, 0, 9],![9, -21, 7, -2, -27],![-7, 17, -6, 1, 21]]]
  s := ![![[], [], [], [], []],![[], [], [], [], [-7]],![[], [], [], [-49], [21, -7]],![[], [], [-49], [0, -49], [-63, 21, -7]],![[], [-7], [21, -7], [-63, 21, -7], [53, -17, 6, -1]]]
  h := Adj
- honed := rfl
+ honed := by decide!
  hd := by norm_num
  hcc := by decide 
  hin := by decide
  hsymma := by decide
- hc_le := by decide 
+ hc_le := by decide! 
 
 lemma T_degree : T.natDegree = 5 := (SubalgebraBuilderOfList T l BQ).hdeg
 
@@ -78,10 +78,10 @@ def Table : Fin 5 → Fin 5 → List ℤ :=
  ![[0, 0, 0, 1, 0], [-2, 2, 1, 3, 7], [1, -10, 5, 10, 0], [-20, 21, 0, 35, 70], [9, -21, 7, -2, -27]], 
  ![[0, 0, 0, 0, 1], [1, -2, 0, 0, -3], [-3, 7, -2, 0, 9], [9, -21, 7, -2, -27], [-7, 17, -6, 1, 21]]]
 
-lemma timesTableT_eq_Table :  ∀ i j , Table i j = List.ofFn (timesTableO.table i j) := by decide
+lemma timesTableT_eq_Table :  ∀ i j , Table i j = List.ofFn (timesTableO.table i j) := by decide!
 
 lemma hroot_mem : θ ∈ O := by
-  refine root_in_subalgebra_lists T l BQ ![0, 1, 0, 0, 0] [] rfl
+  refine root_in_subalgebra_lists T l BQ ![0, 1, 0, 0, 0] [] (by decide!)
 
 instance hp5: Fact $ Nat.Prime 5 := fact_iff.2 (by norm_num)
 instance hp7: Fact $ Nat.Prime 7 := fact_iff.2 (by norm_num)
@@ -107,7 +107,7 @@ noncomputable def D : CertificateDedekindAlmostAllLists T l [7] where
  p := ![5, 7]
  exp := ![8, 2]
  pdgood := [5]
- hsub := by decide
+ hsub := by decide!
  hp := by
   intro i ; fin_cases i 
   exact hp5.out
@@ -139,7 +139,7 @@ noncomputable def M7 : MaximalOrderCertificateOfUnramifiedLists 7 O Om hm where
  wFrob := ![![1, 0, 0, 0, 0],![0, 1, 0, 0, 0],![0, 0, 1, 0, 0],![0, 0, 0, 1, 0],![0, 0, 0, 0, 1]]
  w_ind := ![0, 1, 2, 3, 4]
  hindw := by decide
- hwFrobComp := by intro i ; fin_cases i <;> rfl 
+ hwFrobComp := by decide! 
 
  instance : Fact $ (Irreducible (map (algebraMap ℤ ℚ) T)) where
   out :=  (Polynomial.Monic.irreducible_iff_irreducible_map_fraction_map (T_monic)).1 T_irreducible 

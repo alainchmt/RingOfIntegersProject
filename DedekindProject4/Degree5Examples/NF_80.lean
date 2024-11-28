@@ -40,12 +40,12 @@ noncomputable def BQ : SubalgebraBuilderLists 5 ℤ  ℚ K T l where
 ![![0, 0, 0, 0, 1],![2, 27, -32, -40, 134],![28, 28, -21, -64, 196],![3, -212, 286, 367, -1143],![7, -58, 82, 97, -303]]]
  s := ![![[], [], [], [], []],![[], [], [], [], [-888]],![[], [], [], [-394272], [-118992, -888]],![[], [], [-394272], [0, -197136], [-86580, -59496, -444]],![[], [-888], [-118992, -888], [-86580, -59496, -444], [-52074, -18363, -268, -1]]]
  h := Adj
- honed := rfl
+ honed := by decide!
  hd := by norm_num
  hcc := by decide 
  hin := by decide
  hsymma := by decide
- hc_le := by decide 
+ hc_le := by decide! 
 
 lemma T_degree : T.natDegree = 5 := (SubalgebraBuilderOfList T l BQ).hdeg
 
@@ -78,10 +78,10 @@ def Table : Fin 5 → Fin 5 → List ℤ :=
  ![[0, 0, 0, 1, 0], [6, 89, -106, -134, 444], [84, -38, 85, -16, 0], [-51, -672, 882, 1224, -3774], [3, -212, 286, 367, -1143]], 
  ![[0, 0, 0, 0, 1], [2, 27, -32, -40, 134], [28, 28, -21, -64, 196], [3, -212, 286, 367, -1143], [7, -58, 82, 97, -303]]]
 
-lemma timesTableT_eq_Table :  ∀ i j , Table i j = List.ofFn (timesTableO.table i j) := by decide
+lemma timesTableT_eq_Table :  ∀ i j , Table i j = List.ofFn (timesTableO.table i j) := by decide!
 
 lemma hroot_mem : θ ∈ O := by
-  refine root_in_subalgebra_lists T l BQ ![0, 1, 0, 0, 0] [] rfl
+  refine root_in_subalgebra_lists T l BQ ![0, 1, 0, 0, 0] [] (by decide!)
 
 instance hp37: Fact $ Nat.Prime 37 := fact_iff.2 (by norm_num)
 instance hp2: Fact $ Nat.Prime 2 := fact_iff.2 (by norm_num)
@@ -109,7 +109,7 @@ noncomputable def D : CertificateDedekindAlmostAllLists T l [2, 3, 37] where
  p := ![2, 3, 5, 37]
  exp := ![14, 8, 6, 2]
  pdgood := [5]
- hsub := by decide
+ hsub := by decide!
  hp := by
   intro i ; fin_cases i 
   exact hp2.out
@@ -151,14 +151,14 @@ noncomputable def M2 : MaximalOrderCertificateWLists 2 O Om hm where
  hmod2 := by decide
  hindv := by decide
  hindw := by decide
- hvFrobKer := by intro i ; fin_cases i <;> rfl 
- hwFrobComp := by intro i ; fin_cases i <;> rfl 
- g := ![![1, 0, 1, 1, 1],![1, 0, 1, 0, 1],![1, 1, 1, 0, 1],![0, 1, 1, 0, 0],![0, 0, 0, 1, 1]]
+ hvFrobKer := by decide!
+ hwFrobComp := by decide! 
+ g := ![![1, 0, 1, 1, 1],![1, 1, 0, 0, 1],![1, 1, 1, 0, 1],![0, 1, 1, 0, 0],![0, 0, 0, 1, 1]]
  w1 := ![1, 1]
- w2 := ![1, 1, 1]
- a := ![![1517, 1392],![-28, 171],![-240, 4],![-618, -330],![1922, 1554]]
- c := ![![1670, -1138, -2296],![50, -94, 68],![-195, 64, 424],![-606, 339, 996],![2030, -1320, -2937]]
- hmulw := by decide 
+ w2 := ![1, 0, 1]
+ a := ![![1861, 1668],![246, 229],![-164, 66],![-622, -332],![2270, 1830]]
+ c := ![![2068, -1394, -2874],![258, -176, -350],![-101, 4, 290],![-604, 339, 996],![2426, -1574, -3515]]
+ hmulw := by decide! 
  ac_indw := ![Sum.inl 0, Sum.inl 1, Sum.inr 0, Sum.inr 1, Sum.inr 2]
  hacindw := by decide 
 
@@ -189,14 +189,14 @@ noncomputable def M3 : MaximalOrderCertificateWLists 3 O Om hm where
  hmod2 := by decide
  hindv := by decide
  hindw := by decide
- hvFrobKer := by intro i ; fin_cases i <;> rfl 
- hwFrobComp := by intro i ; fin_cases i <;> rfl 
- g := ![![2, 0, 2, 2, 2],![0, 0, 0, 2, 2],![2, 2, 0, 2, 1],![0, 0, 0, 2, 0],![0, 1, 1, 2, 0]]
- w1 := ![1, 0, 1]
+ hvFrobKer := by decide!
+ hwFrobComp := by decide! 
+ g := ![![0, 0, 1, 1, 0],![1, 0, 2, 2, 2],![0, 2, 2, 1, 1],![0, 1, 1, 0, 0],![0, 1, 1, 2, 0]]
+ w1 := ![1, 1, 1]
  w2 := ![0, 1]
- a := ![![-4526, 10842, 1530],![-8472, 19444, 2748],![-6663, 15330, 2194],![-7170, 16380, 2316],![-4620, 10788, 1536]]
- c := ![![1740, -3930],![2964, -7032],![2343, -5535],![2482, -5922],![1680, -3902]]
- hmulw := by decide 
+ a := ![![-281, 993, 132],![-1203, 3625, 489],![3414, -7056, -968],![3438, -7578, -1044],![-2844, 6984, 972]]
+ c := ![![219, -369],![720, -1335],![-924, 2544],![-1094, 2742],![1152, -2540]]
+ hmulw := by decide! 
  ac_indw := ![Sum.inl 0, Sum.inl 1, Sum.inl 2, Sum.inr 0, Sum.inr 1]
  hacindw := by decide 
 
@@ -219,7 +219,7 @@ noncomputable def M37 : MaximalOrderCertificateOfUnramifiedLists 37 O Om hm wher
  wFrob := ![![1, 0, 0, 0, 0],![0, 1, 0, 0, 0],![0, 0, 1, 0, 0],![0, 0, 0, 1, 0],![0, 0, 0, 0, 1]]
  w_ind := ![0, 1, 2, 3, 4]
  hindw := by decide
- hwFrobComp := by intro i ; fin_cases i <;> rfl 
+ hwFrobComp := by decide! 
 
  instance : Fact $ (Irreducible (map (algebraMap ℤ ℚ) T)) where
   out :=  (Polynomial.Monic.irreducible_iff_irreducible_map_fraction_map (T_monic)).1 T_irreducible 
