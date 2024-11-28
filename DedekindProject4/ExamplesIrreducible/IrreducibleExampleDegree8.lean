@@ -69,10 +69,10 @@ noncomputable def C : CertificateIrreducibleIntOfPrimeDegreeAnalysis T l where
   · dsimp ; exact irreducible_ofList_ofCertificateIrreducibleZModOfList' P2P0
   · dsimp ; exact irreducible_ofList_ofCertificateIrreducibleZModOfList' P2P0
  hm := by decide
- hprod := by decide
- hinter := by decide
- hrhoeq := by rfl
- hrho := by rfl
+ hprod := by decide!
+ hinter := by decide!
+ hrhoeq := by decide!
+ hrho := by decide!
  hs := by norm_num
  heval := by norm_num
 

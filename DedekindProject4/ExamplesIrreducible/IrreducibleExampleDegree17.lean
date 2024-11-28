@@ -135,7 +135,7 @@ noncomputable def C : IrreducibleCertificateIntPolynomial T l where
   · dsimp ; exact irreducible_ofList_ofCertificateIrreducibleZModOfList' P7P1
   · dsimp ; exact irreducible_ofList_ofCertificateIrreducibleZModOfList' P7P2
  hm := by decide
- hprod := by decide
- hinter := by decide
+ hprod := by decide!
+ hinter := by decide!
 
 theorem irreducible_T : Irreducible T := irreducible_of_CertificateIntPolynomial _ _ C
