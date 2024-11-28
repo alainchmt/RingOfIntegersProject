@@ -18,33 +18,30 @@ lemma algebraBuilder_discr_eq_mul_polynomial_discr (hi : Irreducible T)
 (A : SubalgebraBuilderLists n ℤ ℚ K T l) :
    algebraMap ℤ ℚ ((Algebra.discr ℤ (basisOfBuilderLists T l A) )) =
     ((algebraMap ℤ ℚ (A.d ^ n))⁻¹ * (algebraMap ℤ ℚ (∏ i, (A.B i i)))) ^ 2 *
-    ((-1) ^ (T.natDegree * (T.natDegree - 1) / 2) *
-    (algebraMap ℤ ℚ) (T.discriminant)) := by
-  have aux : (Polynomial.map (algebraMap ℤ ℚ) T).discriminant  = (algebraMap ℤ ℚ) (T.discriminant)  := by
-    rw [discriminant, derivative_map , resultant_map, discriminant]
+    (algebraMap ℤ ℚ) (T.discriminant) := by
+  have aux : (Polynomial.map (algebraMap ℤ ℚ) T).discriminant  = (algebraMap ℤ ℚ) (T.discriminant) := by
+    rw [discriminant_map']
     exact RingHom.injective_int (algebraMap ℤ ℚ)
   have hm : Monic T := by
     simp only [Monic, leadingCoeff, (SubalgebraBuilderOfList T l A).hdeg,
       (SubalgebraBuilderOfList T l A).hm]
   have : Irreducible (Polynomial.map (algebraMap ℤ ℚ) T) := by
     exact (Polynomial.Monic.irreducible_iff_irreducible_map_fraction_map (hm)).1 hi
-  rw [← Polynomial.Monic.natDegree_map hm (algebraMap ℤ ℚ), ←  aux,
-  ← Algebra.discr_of_isAdjoinRootMonic (isAMK A) this ]
+  rw [← aux, ← Algebra.discr_of_isAdjoinRootMonic (isAMK A) this]
   exact OfBuilderList_discr_eq_prod_discr' A
 
 
 lemma algebraBuilder_discr_eq_mul_polynomial_discr' (hi : Irreducible T)
 (A : SubalgebraBuilderLists n ℤ ℚ K T l) :
     (Algebra.discr ℤ (basisOfBuilderLists T l A) ) =
-      ((-1) ^ (T.natDegree * (T.natDegree - 1) / 2) *
-      (∏ i, (A.B i i)) ^ 2 * T.discriminant) / A.d ^ (2 * n) := by
+      ((∏ i, (A.B i i)) ^ 2 * T.discriminant) / A.d ^ (2 * n) := by
   symm
   have haux : A.d ^ (2 * n) ≠ 0 := by
     simp only [ne_eq, pow_eq_zero_iff', A.hd, mul_eq_zero, OfNat.ofNat_ne_zero, false_or,
     false_and, not_false_eq_true]
   refine Int.ediv_eq_of_eq_mul_left haux ?_
   apply_fun (algebraMap ℤ ℚ)
-  rw [map_mul, map_mul, map_mul, algebraBuilder_discr_eq_mul_polynomial_discr hi A, mul_pow]
+  rw [map_mul, map_mul, algebraBuilder_discr_eq_mul_polynomial_discr hi A, mul_pow]
   simp only [algebraMap_int_eq, Int.reduceNeg, map_pow, map_neg, map_one, map_prod, eq_intCast,
     inv_pow]
   cancel_denoms
@@ -64,8 +61,7 @@ variable [NumberField K]
 lemma discr_numberField_eq_discrSubalgebraBuilder (hi : Irreducible T)
 (A : SubalgebraBuilderLists n ℤ ℚ K T l)
   (heq : subalgebraOfBuilderLists T l A = integralClosure ℤ K ) :
-  NumberField.discr K = ((-1) ^ (T.natDegree * (T.natDegree - 1) / 2) *
-      (∏ i, (A.B i i)) ^ 2 * T.discriminant) / A.d ^ (2 * n) := by
+  NumberField.discr K = ((∏ i, (A.B i i)) ^ 2 * T.discriminant) / A.d ^ (2 * n) := by
   have hdeg : (map (algebraMap ℤ ℚ) T).natDegree = T.natDegree := by
     apply Polynomial.natDegree_map_eq_of_injective (algebraMap ℤ ℚ).injective_int _
   rw [← algebraBuilder_discr_eq_mul_polynomial_discr' hi]
@@ -86,10 +82,3 @@ lemma discr_numberField_eq_discrSubalgebraBuilder (hi : Irreducible T)
   congr
   simp only [Basis.coe_reindex, Equiv.symm_symm, Baux', Baux, Bi]
   rfl
-
-/-
-    refine Algebra.algebra_ext algebraRat _ ?h.e'_2.h.e'_5.h.h.e'_5.h.h
-    intro r
-    simp only [eq_ratCast]
-
--/
