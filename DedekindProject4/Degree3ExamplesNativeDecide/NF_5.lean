@@ -4,7 +4,7 @@ import DedekindProject4.CertifyAdjoinRoot
 import Mathlib.Tactic.NormNum.Prime
 import DedekindProject4.MaximalAPI
 import Mathlib.NumberTheory.NumberField.Basic
-import DedekindProject4.Degree3Examples.Irreducible5
+import DedekindProject4.Degree3ExamplesNativeDecide.Irreducible5
 import DedekindProject4.DiscriminantSubalgebraBuilder
 
 open Polynomial
