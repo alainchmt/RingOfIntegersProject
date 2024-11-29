@@ -130,12 +130,12 @@ def SubalgebraBuilderF(T, C, d, f):
     strs = strs + "]"
     print(strs, file = f)
     print(""" h := Adj
- honed := rfl
+ honed := by decide!
  hd := by norm_num
  hcc := by decide 
  hin := by decide
  hsymma := by decide
- hc_le := by decide """, file = f)
+ hc_le := by decide! """, file = f)
     return A , C.inverse() * (d * vector([0 if i != 1 else 1 for i in range(n)]))
 
 
@@ -227,7 +227,7 @@ def CertificateDedekindF(T, f):
     print(' p :=' + " !"+ str(pl), file = f)
     print(' exp :=' + " !"+ str(exp), file = f)
     print(' pdgood :=',good, file = f)
-    print(' hsub := by decide', file = f)
+    print(' hsub := by decide!', file = f)
     print(""" hp := by
   intro i ; fin_cases i """, file = f)
     for p in pl:
@@ -321,7 +321,7 @@ def CertificatePMaximalityF (T , C, denom , p, Table, F):
         print(strF + ']', file = f)
         print (' w_ind := !' + str([w_ind[i] for i in range(n)]), file = f)
         print(""" hindw := by decide
- hwFrobComp := by intro i ; fin_cases i <;> rfl """, file = f)
+ hwFrobComp := by decide! """, file = f)
     else : 
         MQQ=MatrixSpace(ZZ, d)
         MQ1=MatrixSpace(ZZ, m, d)
@@ -339,7 +339,9 @@ def CertificatePMaximalityF (T , C, denom , p, Table, F):
             return (MS (Brad2.inverse() * matrix([(B[j]*ListBasisRad[i]).list() for i in range(d)]).transpose()))
 
         # We look for a witness for linear independence
-        
+        set_random_seed(12345)
+
+
         for i in range(100):
             W = random_vector(ZZ, d, floor(d/2))
             LII = matrix([(MatrixEndoMul(i) * W).list() for i in range(d)]).transpose()
@@ -486,8 +488,8 @@ def CertificatePMaximalityF (T , C, denom , p, Table, F):
  hmod2 := by decide
  hindv := by decide
  hindw := by decide
- hvFrobKer := by intro i ; fin_cases i <;> rfl 
- hwFrobComp := by intro i ; fin_cases i <;> rfl """, file = f)
+ hvFrobKer := by decide!
+ hwFrobComp := by decide! """, file = f)
         strg = ""
         print(' g := ![', end = "", file = f)
         for i in range(d):
@@ -516,7 +518,7 @@ def CertificatePMaximalityF (T , C, denom , p, Table, F):
                 else : 
                     strc = strc + '!' + str(c[i])
             print(strc + ']', file = f)
-            print (' hmulw := by decide ', file = f)
+            print (' hmulw := by decide! ', file = f)
             strac_indw = ""
             print(' ac_indw := ![', end = "", file = f)
             for i in range(d):
@@ -593,9 +595,9 @@ def CertificatePMaximalityF (T , C, denom , p, Table, F):
                     strind = strind + '(' + ab_ind[i][0] + ', ' + ab_ind[i][1] + ')'
             print(' ab_ind := ![' + strind + ']', file = f)
 
-            print(""" hindab := by decide
- hmul1 := by decide
- hmul2 := by decide
+            print(""" hindab := by decide!
+ hmul1 := by decide!
+ hmul2 := by decide!
             """, file = f)
     return flag , flagW
 
@@ -611,8 +613,9 @@ def CertificatePMaximalityF (T , C, denom , p, Table, F):
 # f : the file where the Lean code will be written. 
 # nameIrr : the name of the file which contains a proof irreducible_T proving the irreducibility of T
 # comment : comment in the beginning of the file 
+# flagD : set to 1 if it includes proof of discriminant. 
 
-def LeanProof(T, basis, f, nameIrr, comment):
+def LeanProof(T, basis, f, nameIrr, comment, flagD):
     d = T.degree()
     C , denom = BasisToMatrix(basis)
     print(f"""
@@ -621,8 +624,10 @@ import DedekindProject4.CertifyAdjoinRoot
 import Mathlib.Tactic.NormNum.Prime
 import DedekindProject4.MaximalAPI
 import Mathlib.NumberTheory.NumberField.Basic
-import DedekindProject4.{nameIrr}
-
+import DedekindProject4.{nameIrr}""", file = f)
+    if flagD == 1:
+        print(f"""import DedekindProject4.DiscriminantSubalgebraBuilder""", file = f)
+    print(f"""
 {comment}
 
 open Polynomial
@@ -681,10 +686,10 @@ noncomputable def timesTableO : TimesTable (Fin {T.degree()}) ℤ O :=
     print(strTa + ']', file = f)
 
     print(f"""
-lemma timesTableT_eq_Table :  ∀ i j , Table i j = List.ofFn (timesTableO.table i j) := by decide
+lemma timesTableT_eq_Table :  ∀ i j , Table i j = List.ofFn (timesTableO.table i j) := by decide!
 
 lemma hroot_mem : θ ∈ O := by
-  refine root_in_subalgebra_lists T l BQ !{auxTemp.list()} [] rfl
+  refine root_in_subalgebra_lists T l BQ !{auxTemp.list()} [] (by decide!)
 """, file=f)
 
     bad = CertificateDedekindF(T, f)
@@ -721,6 +726,25 @@ theorem O_ringOfIntegers : O = integralClosure ℤ K := by
     print("", file = f)
     print(f"""theorem  O_ringOfIntegers' : O = NumberField.RingOfIntegers K := by rw [O_ringOfIntegers] ; rfl
     """, file = f)
+    if flagD == 1:
+        K.<b>=NumberField(T)
+        D = K.discriminant()
+        print(f"""
+lemma T_discr : T.discriminant = {T.discriminant()} :=  by
+  rw [T_monic.discriminant_def, T_degree, ← T_ofList]
+  have : {list(T)}.derivative = {list(derivative(T)) + [0]} := rfl
+  rw [← ofList_derivative_eq_derivative , this]
+  decide!
+
+theorem K_discr : NumberField.discr K = {D} := by
+  rw [discr_numberField_eq_discrSubalgebraBuilder
+  T_irreducible BQ O_ringOfIntegers]
+  rw [T_discr]
+  rfl
+
+""", file = f)
+
+
     f.close()
 
 
@@ -736,6 +760,6 @@ theorem O_ringOfIntegers : O = integralClosure ℤ K := by
 #T = X^5 - 20*X^2 + 240*X - 48
 #f = open(f"Example0.lean", "w")
 #doc = open(f"IrreducibleExample0.lean", "w")
-#LeanProof(T,B,f,'IrreducibleExample0', '--Label 5.1.227812500.1 in the LMFDB')
+#LeanProof(T,B,f,'IrreducibleExample0', '--Label 5.1.227812500.1 in the LMFDB',0)
 #LeanProofIrreducible(T, doc)
 

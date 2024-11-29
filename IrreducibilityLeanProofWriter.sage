@@ -294,8 +294,8 @@ def GlobalCertificateIrrF (T, lprimes, f):
                 for j in range(F[i][1]):
                     print(f'  · dsimp ; exact irreducible_ofList_ofCertificateIrreducibleZModOfList\' P{p}P{i}', file = f)
     print(' hm := by decide', file = f)
-    print(' hprod := by decide', file = f)
-    print(' hinter := by decide', file = f)
+    print(' hprod := by decide!', file = f)
+    print(' hinter := by decide!', file = f)
 
 
 # In[120]:
@@ -586,10 +586,10 @@ def GlobalCertificateLPFWDegree (T, lprimes, dmin, f, rho, M, prime, doc) :
                 for j in range(F[i][1]):
                     print(f'  · dsimp ; exact irreducible_ofList_ofCertificateIrreducibleZModOfList\' P{p}P{i}', file = doc)
     print(f' hm := by decide', file = doc)
-    print(f' hprod := by decide', file = doc)
-    print(f' hinter := by decide', file = doc)
-    print(f' hrhoeq := by rfl', file = doc)
-    print(f' hrho := by rfl', file = doc)
+    print(f' hprod := by decide!', file = doc)
+    print(f' hinter := by decide!', file = doc)
+    print(f' hrhoeq := by decide!', file = doc)
+    print(f' hrho := by decide!', file = doc)
     print(f' hs := by norm_num', file = doc)
     print(f' heval := by norm_num', file = doc)
 
@@ -630,8 +630,8 @@ def GlobalCertificateLPFW (T, f, rho, M, prime, doc) :
     else : 
         print(' hPPrime := sorry -- Consider using Pratt certificate', file = doc) # Otherwise we 'sorry' the proof.
     print(' hrpos := by norm_num', file = doc)
-    print(' hrhoeq := by rfl', file = doc)
-    print(' hrho := by rfl', file = doc)
+    print(' hrhoeq := by decide!', file = doc)
+    print(' hrho := by decide!', file = doc)
     print(' hs := by norm_num', file = doc)
     print(' heval := by norm_num', file = doc)
 
