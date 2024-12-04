@@ -19,6 +19,7 @@ To accomplish this, we wrote SageMath code that computes the corresponding certi
 - `DedekindProject4/Degree5Examples`: Verification of an integral basis for the ring of integers of the 142 non-monogenic degree 5 number fields in the LMFDB, unramified outside the primes 2,3 and 5.
 - `DedekindProject4/Degree6Examples`: Verification of an integral basis for the ring of integers of a degree 6 number field.  
 - `DedekindProject4/Degree8Example`: Verification of an integral basis for the ring of integers of a degree 8 number field.
+- `DedekindProject4/DiscriminantExample.lean`: Numeric computation of the resultant and discriminant for a specific polynomial; corresponds to Appendix B.
 
 ## SageMath Files 
 - `IrreducibilityLeanProofWriter.sage`: The function `LeanProofIrreducible` writes a Lean proof of irreducibility
