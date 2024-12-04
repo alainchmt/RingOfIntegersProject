@@ -969,9 +969,6 @@ local notation x "mod" p => (@Submodule.Quotient.mk ℤ Ip _ _ _ ((p : ℤ ) •
 local notation "R" =>  O ⧸ Ideal.span {(p : O)}
 local notation x "mod''" p => (Ideal.Quotient.mk (Ideal.span {(p : O)} )) x
 
--- We had to exclude this instance from the search, otherwise Lean has trouble finding the
--- Module (ZMod p) _ instance for the type (Ip mod' p) →ₗ[ZMod p] (Ip mod' p) ·
-attribute [-instance] Submodule.Quotient.smulCommClass
 
 /-- If the kernel of `map_to_end_lin` is trivial, then `O` equals the multiplier ring of `Iₚ`·  -/
 theorem mult_ring_eq_ring_of_trivial_ker_map_to_end_lin

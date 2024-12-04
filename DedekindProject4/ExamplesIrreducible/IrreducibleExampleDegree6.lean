@@ -28,7 +28,3 @@ noncomputable def C : CertificateIrreducibleIntOfPrime T l where
  heval := by norm_num
 
 theorem irreducible_T : Irreducible T := irreducible_of_CertificateIrreducibleIntOfPrime _ _ C
-
-example : cauchyBoundScaledOfList [3,14,15,92,65] (1/2) = 249/130 := by decide!
-
-example : Nat.Prime 7 := by decide
